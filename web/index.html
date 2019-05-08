@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-framework="backbonejs">
+    <head>
+        <meta charset="utf-8">
+        <title>Spare Rib Map</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
+        <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css">
+        <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css">
+      
+        
+    </head>
+    <body>
+        <section class="sr-map-app">
+            <header class="header">
+                <h1>Spare Rib Map</h1>
+            </header>
+            <section class="main">
+                <div id="sr-map-app"></div>
+                <div id="sr-map"></div>
+            </section>
+            <footer class="footer"></footer>
+        </section>
+
+        <script src="node_modules/moment/moment.js" charset="utf-8"></script>
+        <script src="node_modules/jquery/dist/jquery.js" charset="utf-8"></script>
+        <script src="node_modules/underscore/underscore.js" charset="utf-8"></script>
+        <script src="node_modules/backbone/backbone.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet/dist/leaflet.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+        <script src="node_modules/leaflet.markercluster.layersupport/dist/leaflet.markercluster.layersupport.js"></script>
+
+
+        <script src="js/models/map.js" charset="utf-8"></script>
+        <script src="js/models/feature.js" charset="utf-8"></script>
+        <script src="js/collections/features.js" charset="utf-8"></script>
+        <script src="js/views/app-view.js" charset="utf-8"></script>
+        <script src="js/views/map-view.js" charset="utf-8"></script>
+        <script src="js/app.js" charset="utf-8"></script>
+    </body>
+</html>

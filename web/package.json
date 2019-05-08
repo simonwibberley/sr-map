@@ -1,0 +1,15 @@
+{
+  "name": "sr-map",
+  "version": "1.0.0",
+  "dependencies": {
+    "backbone": "^1.4.0",
+    "backbone.localstorage": "^2.0.2",
+    "express": "^4.16.4",
+    "jquery": "^3.4.0",
+    "leaflet": "^1.4.0",
+    "leaflet.markercluster": "^1.4.1",
+    "leaflet.markercluster.layersupport": "^2.0.1",
+    "leaflet.timeline": "^1.2.1",
+    "moment": "^2.24.0"
+  }
+}
