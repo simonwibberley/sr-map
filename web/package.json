@@ -8,6 +8,7 @@
     "express": "^4.16.4",
     "jquery": "^3.4.0",
     "leaflet": "^1.4.0",
+    "leaflet.featuregroup.subgroup": "^1.0.2",
     "leaflet.markercluster": "^1.4.1",
     "leaflet.markercluster.layersupport": "^2.0.1",
     "leaflet.timeline": "^1.2.1",

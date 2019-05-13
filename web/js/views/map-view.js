@@ -26,12 +26,20 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
         render: function() {
 
             var getCategories = (features) => {
-                var categories = new Set();
+                var categories = new Map();
                 for(var i = 0; i < features.features.length; ++i) {
-                    categories.add(features.features[i].properties.data.categories[0]);
+                    var feature = features.features[i];
+                    var cat = feature.properties.data.categories[0];
+                    if(categories.has(cat)) {
+                        var feats = categories.get(cat);
+                        feats.push(feature);
+                        categories.set(cat, feats);
+                    } else {
+                        categories.set(cat, [feature]);
+                    }
                 }
-                categories = Array.from(categories);
-                categories.sort();
+                // categories = Array.from(categories);
+                // categories.sort();
                 return categories;
             }
 
@@ -52,36 +60,41 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 .setView(options['startCentre'], options['startZoom'])
                 .addLayer(L.tileLayer(options['layerUrl'], { maxZoom: 18 }));
             
-            var features = app.features.toJSON();
+            var features = app.features;
 
-            var categories = getCategories(features);
-
+            var categoriesFeatures = getCategories(features.toJSON());
+            var categories = Array.from(categoriesFeatures.keys());
+            categories.sort();
             console.log(categories);
             
-            var timeline = this.timeline = L.timeline(features, {
-                // start :start.toDate().getTime(),
-                // end: end.toDate().getTime(),
-                getInterval: (feature) => {
-                    return {
-                        start : moment(feature.properties.start).subtract(4, 'months').toDate(),
-                        end : moment(feature.properties.end).add(4, 'months').toDate(),
-                    };
-                },
-                // drawOnSetTime: false,
-                pointToLayer: function(data, latlng) {
-      
-                    return L.circleMarker(latlng, {radius:5, color:'red'}).bindPopup(function(l) {
-                        return "<ul>" +
-                        // "<li>Match: " + data.metadata.with[0].match + "</li>"+
-                        // "<li>Original: " + data.metadata.spanned + "</li>"+
-                        "<li>Lat: " + latlng.lat + "</li>"+
-                        "<li>Lng: " + latlng.lng+ "</li>"+
-                        // "<li>Date: " + data.metadata.date + "</li>"+
-                        // "<li>Trial: " + data.metadata.trialId + "</li>"+
-                        "</ul>";
-                    });
-                }
-            });
+            var makeTimeline = (features) => {
+                var timeline = L.timeline(features.toJSON(), {
+                    // start :start.toDate().getTime(),
+                    // end: end.toDate().getTime(),
+                    getInterval: (feature) => {
+                        return {
+                            start : moment(feature.properties.start).subtract(4, 'months').toDate(),
+                            end : moment(feature.properties.end).add(4, 'months').toDate(),
+                        };
+                    },
+                    // drawOnSetTime: false,
+                    pointToLayer: function(data, latlng) {
+            
+                        return L.circleMarker(latlng, {radius:5, color:'red'}).bindPopup(function(l) {
+                            return "<ul>" +
+                            // "<li>Match: " + data.metadata.with[0].match + "</li>"+
+                            // "<li>Original: " + data.metadata.spanned + "</li>"+
+                            "<li>Lat: " + latlng.lat + "</li>"+
+                            "<li>Lng: " + latlng.lng+ "</li>"+
+                            // "<li>Date: " + data.metadata.date + "</li>"+
+                            // "<li>Trial: " + data.metadata.trialId + "</li>"+
+                            "</ul>";
+                        });
+                    }
+                });
+                return timeline;
+            }
+                
 
 
             var timelineControl = this.timelineControl = L.timelineSliderControl({
@@ -96,8 +109,6 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             });
 
             timelineControl.addTo(map);
-            timelineControl.addTimelines(timeline);
-
 
             var iconCreateFunction = (cluster) => {
                 var catDist = {};
@@ -136,11 +147,33 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 iconCreateFunction : iconCreateFunction
             });
 
-            
-            mcgLayerSupportGroup.addTo(map);
-            mcgLayerSupportGroup.checkIn(timeline); 
-            timeline.addTo(map);
 
+            var control = L.control.layers(null, null);            
+
+
+            var timelines = {};
+            for(var i = 0; i < categories.length; ++i) {
+                var category = categories[i];
+                var categoryFeatures = new app.Features(categoriesFeatures.get(category));
+                if(categoryFeatures.length > 0) {
+
+                    var timeline = makeTimeline(categoryFeatures);
+                    timelines[category] = timeline;
+                    timelineControl.addTimelines(timeline);
+    
+                    timeline.addTo(map);
+                    var subGroup = L.featureGroup.subGroup(mcgLayerSupportGroup);
+                    timeline.addTo(subGroup);
+                    mcgLayerSupportGroup.checkIn(subGroup);
+                    control.addOverlay(subGroup, category);
+                    subGroup.addTo(map);
+
+                }
+
+            }
+
+            mcgLayerSupportGroup.addTo(map);
+            control.addTo(map);
         }
         
     });
