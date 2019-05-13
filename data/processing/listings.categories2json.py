@@ -32,7 +32,7 @@ def process2json(file_path):
             except KeyError:
                 listing_categories[listing] = [category]
 
-    with open("listings.categories.json", "w") as f:
+    with open("../listings.categories.json", "w") as f:
         json.dump(listing_categories, f)
     # print(json.dumps(categories, indent=4, sort_keys=True))    
 
@@ -41,7 +41,7 @@ def process2json(file_path):
 
 
 if __name__ == "__main__":
-    process2json("listings.categories.19-04-30.strimpel.txt")
+    process2json("../listings.categories.19-04-30.strimpel.txt")
 
 
 

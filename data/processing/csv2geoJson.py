@@ -15,7 +15,7 @@ DATE_FORMAT = "%Y-%m-%d"
 
 outcodes = {}
 places = {}
-categories = {}
+listing_categories = {}
 def load_outcodes() :
     global outcodes
     with open("../geo/postcode-outcodes.csv") as csvfile:
@@ -89,19 +89,21 @@ def load_gn_places() :
     with open("../geo/geonames/GB.txt") as csvfile:
         reader = csv.reader(csvfile, dialect=csv.excel_tab)
         for row in reader:
-            print(row)
+            # print(row)
             if( row[h['feature class']] not in set(['P', 'A'])):
                 continue
             try :
                 lat, lng = row[h['latitude']], row[h['longitude']]
                 name = row[h['name']]
+                feature_code = row[h['feature code']]
                 try :
                     places[name]
                 except KeyError: 
                     places[name] = []
                 places[name].append({
                     "lat" : lat,
-                    "lng" : lng
+                    "lng" : lng,
+                    "feature_code" : feature_code
                     # ,
                     # "meta" : row
                 })
@@ -130,6 +132,8 @@ def get_lat_lng(data):
         #print(coords)
     elif data :
         try :
+            # if len(places[data]) > 1:
+            #     print("ambiguous place %s" % data)
             coords = places[data][0]
         except KeyError:
             #print(data)
@@ -146,7 +150,7 @@ def process_listings_csv(file_path) :
     with open(file_path) as csvfile:
         reader = csv.reader(csvfile)
         headers = next(reader)
-        h = b = dict(zip(headers, range(len(headers))))
+        h = dict(zip(headers, range(len(headers))))
         for row in reader:
             loc = get_lat_lng(row[h['postcode']].strip())
             loc_str = row[h['postcode']]
@@ -161,17 +165,22 @@ def process_listings_csv(file_path) :
                     date = dateparser.parse(match.group(1))
                     start = datetime.date(date.year, date.month, 1)
                     end = datetime.date(date.year, date.month, monthrange(date.year, date.month)[1])
-                    listing = row[h['Listing']]
-                    categories = categories[listing]
+                    listing = row[h['Listing']].strip()
+                    try :
+                        categories = listing_categories[listing]
+                    except KeyError:
+                        # print("%s not found" % listing)
+                        categories = ["X"]
 
                     data = {
                         "listing" : listing,
-                        "concerns_race" : row[h['Concerns race?']].lower().contains("yes"),
-                        "concerns_sexuality" : row[h['Explicitly and foremost concerns sexuality?']].lower().contains("yes"),
+                        "concerns_race" : "yes" in row[h['Concerns race?']].lower(),
+                        "concerns_sexuality" : "yes" in row[h['Explicitly and foremost concerns sexuality?']].lower(),
                         "info" : row[h['Additional info']],
                         "type" : row[h['Type']],
                         "cultural_genre" : row[h['Cultural genre']],
-                        "location" : loc_str
+                        "location" : loc_str,
+                        "categories" : categories
                     }
                     feature = {
                         "type": "Feature",
@@ -195,9 +204,9 @@ def process_listings_csv(file_path) :
 
 
 def load_categories() :
-    global categories
+    global listing_categories
     with open("../listings.categories.json") as fp:
-        categories = json.load(fp)
+        listing_categories = json.load(fp)
 
 if __name__ == "__main__" :
     load_outcodes()
