@@ -56,9 +56,13 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             var end = options['end'];
             var DATE_FORMAT = options['DATE_FORMAT'];
 
-            var map = this.map =  L.map(this.$el.attr('id'))
-                .setView(options['startCentre'], options['startZoom'])
-                .addLayer(L.tileLayer(options['layerUrl'], { maxZoom: 18 }));
+            var map = this.map =  L.map(this.$el.attr('id'), {
+                "zoomDelta": 0.2,
+                "maxZoom" : 10,
+                "zoomSnap" : 0.2,
+                "wheelPxPerZoomLevel" : 100
+                }).setView(options['startCentre'], options['startZoom'])
+                .addLayer(L.tileLayer(options['layerUrl']));
             
             var features = app.features;
 
@@ -79,8 +83,10 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     },
                     // drawOnSetTime: false,
                     pointToLayer: function(data, latlng) {
+                        var cat1 = data.properties.data.categories[0];
+                        var color = _colors[categories.indexOf(cat1)]
             
-                        return L.circleMarker(latlng, {radius:5, color:'red'}).bindPopup(function(l) {
+                        return L.circleMarker(latlng, {"radius":5, "color":color}).bindPopup(function(l) {
                             return "<ul>" +
                             // "<li>Match: " + data.metadata.with[0].match + "</li>"+
                             // "<li>Original: " + data.metadata.spanned + "</li>"+
@@ -137,14 +143,20 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 
                 var style = "background: conic-gradient("+slices.join(',')+");"
                 return new L.DivIcon({ 
-                    html: '<div style="'+style+'"><span>' + markerCount + '</span></div>', 
-                    className: 'marker-cluster' + " marker-cluster-medium", 
-                    iconSize: new L.Point(40, 40) 
+                    html: '<div  class="marker-cluster-sr-outer" style="'+style+'"><div class="marker-cluster-sr-inner"><span>' + markerCount + '</span></div></div>', 
+                    className: 'marker-cluster-sr', 
+                    iconSize: new L.Point(50, 50) 
                 });
             }
 
             var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({
-                iconCreateFunction : iconCreateFunction
+                iconCreateFunction : iconCreateFunction,
+                maxClusterRadius : 60,
+                helpingCircles : true,
+                elementsPlacementStrategy : 'default',
+                spiderLegPolylineOptions : {weight: 0},
+                spiderfyDistanceMultiplier: 1.5,
+                animate : true
             });
 
 
