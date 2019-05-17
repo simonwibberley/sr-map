@@ -52,7 +52,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 
             var categoryIcons = {
-                'CAMPAIGN' : {
+                'CAMPAIGNS' : {
                     icon: 'bell',
                     color: 'pink-1'
                 },
@@ -76,7 +76,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     icon: 'business-time',
                     color: 'blue-3'
                 },
-                "CONFERENCE": {
+                "CONFERENCES": {
                     icon: 'compress-arrows-alt',
                     color: 'green-4'
                 },
@@ -84,7 +84,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     icon: 'comment',
                     color: 'pink-4'
                 },
-                "GROUP": {
+                "GROUPS": {
                     icon: 'coffee',
                     color: 'orange-1'
                 },
@@ -97,7 +97,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     icon: 'chalkboard-teacher',
                     color: 'blue-4'
                 },
-                "ACCOOM": {
+                "ACCOM": {
                     icon: 'bed',
                     color: 'orange-3'
                 },
@@ -255,7 +255,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({
                 iconCreateFunction : iconCreateFunction,
-                maxClusterRadius : 80,
+                maxClusterRadius : 50,
                 helpingCircles : true,
                 elementsPlacementStrategy : 'default',
                 spiderLegPolylineOptions : {weight: 1},
@@ -270,7 +270,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             });
 
 
-            var control = L.control.layers(null, null);            
+            var control = L.control.layers(null, null);
 
 
             var timelines = {};

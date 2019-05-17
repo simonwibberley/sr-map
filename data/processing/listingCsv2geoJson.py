@@ -4,6 +4,7 @@ import glob
 import re
 import json
 import dateparser 
+import random
 import datetime
 from calendar import monthrange
 from bng_to_latlon import OSGB36toWGS84
@@ -169,8 +170,12 @@ def process_listings_csv(file_path) :
                     try :
                         categories = listing_categories[listing]
                     except KeyError:
-                        # print("%s not found" % listing)
+                        print("%s not found" % listing)
                         categories = ["X"]
+
+                    r1 = random.randint(-10,10) * 0.01
+                    r2 = random.randint(-10,10) * 0.01
+                    # print(r1)
 
                     data = {
                         "listing" : listing,
@@ -193,7 +198,7 @@ def process_listings_csv(file_path) :
                         },
                         "geometry" : {
                             "type" : "Point",
-                            "coordinates" : [loc["lng"], loc["lat"]]
+                            "coordinates" : [float(loc["lng"])+r1, float(loc["lat"])+r2]
                         }
                     }
                     features.append(feature)
@@ -205,7 +210,7 @@ def process_listings_csv(file_path) :
 
 def load_categories() :
     global listing_categories
-    with open("../listings.categories.json") as fp:
+    with open("../listings.categories2.json") as fp:
         listing_categories = json.load(fp)
 
 if __name__ == "__main__" :
