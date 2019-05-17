@@ -42,3 +42,29 @@
     line-height: 47px;
     font-size: 14px;
 }
+
+
+
+.pink-0 { color: #8B2E5F }	/* Main Primary color */
+.pink-1 { color: #F70082 }
+.pink-2 { color: #BF0667 }
+.pink-3 { color: #BC528A }
+.pink-4 { color: #E889BB }
+
+.orange-0 { color: #AA7039 }	/* Main Secondary color (1) */
+.orange-1 { color: #FF7C00 }
+.orange-2 { color: #EA7607 }
+.orange-3 { color: #E6A464 }
+.orange-4 { color: #FFC996 }
+
+.blue-0 { color: #255E69 }	/* Main Secondary color (2) */
+.blue-1 { color: #00C9EE }
+.blue-2 { color: #087B90 }
+.blue-3 { color: #40828E }
+.blue-4 { color: #7CC2CF }
+
+.green-0 { color: #789E35 }	/* Main Complement color */
+.green-1 { color: #A2FC00 }
+.green-2 { color: #8ED907 }
+.green-3 { color: #ABD65D }
+.green-4 { color: rgb(78, 112, 15) }

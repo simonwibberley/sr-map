@@ -10,7 +10,6 @@ var app = app || {};
 	// The collection of todos is backed by *localStorage* instead of a remote
 	// server.
 	app.Features = Backbone.Collection.extend({
-        url : 'assets/listings.geo.json',
 		// Reference to this collection's model.
         model: app.Feature,
         toJSON : function() {

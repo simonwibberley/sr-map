@@ -16,8 +16,14 @@ $(function () {
         layerUrl : "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     });
 
-    app.features = new app.Features();
-    var promise = app.features.fetch();
+    app.listings = new app.Features();
+    app.listings.url = "assets/listings.geo.json";
+
+    app.letters = new app.Features();
+    app.letters.url = "assets/letters.geo.json";
+    
+    var promise = app.listings.fetch();
+    app.letters.fetch();
 
     promise.done( () => {
         var appView = new app.AppView();

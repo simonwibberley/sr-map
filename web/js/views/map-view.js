@@ -1,6 +1,31 @@
 /*global Backbone, jQuery, _, ENTER_KEY */
 var app = app || {};
 
+var _colors2 = {"pink-0" : "#8B2E5F",   /* Main Primary color */
+"pink-1" : "#F70082",
+"pink-2" : "#BF0667",
+"pink-3" : "#BC528A",
+"pink-4" : "#E889BB",
+
+"orange-0" : "#AA7039", /* Main Secondary color (1) */
+"orange-1" : "#FF7C00",
+"orange-2" : "#EA7607",
+"orange-3" : "#E6A464",
+"orange-4" : "#FFC996",
+
+"blue-0" : "#255E69",   /* Main Secondary color (2) */
+"blue-1" : "#00C9EE",
+"blue-2" : "#087B90",
+"blue-3" : "#40828E",
+"blue-4" : "#7CC2CF",
+
+"green-0" : "#789E35",  /* Main Complement color */
+"green-1" : "#A2FC00",
+"green-2" : "#8ED907",
+"green-3" : "#ABD65D",
+"green-4" : "#D2F691"};
+
+
 var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
 "#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
 "#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
@@ -24,6 +49,77 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
     app.MapView = Backbone.View.extend({
         el:"#sr-map",
         render: function() {
+
+
+            var categoryIcons = {
+                'CAMPAIGN' : {
+                    icon: 'bell',
+                    color: 'pink-1'
+                },
+                'SERVICES-THERAPY': {
+                    icon: 'bath',
+                    color: 'blue-1'
+                },
+                'ARTS-ENTERTAINMENT': {
+                    icon: 'guitar',
+                    color: 'green-0'
+                }, 
+                'TRAVEL': {
+                    icon: 'hiking',
+                    color: 'green-1'
+                },
+                'BOOKS-PUBS': {
+                    icon: 'book-open',
+                    color: 'orange-0'
+                },
+                "BUSINESS": {
+                    icon: 'business-time',
+                    color: 'blue-3'
+                },
+                "CONFERENCE": {
+                    icon: 'compress-arrows-alt',
+                    color: 'green-4'
+                },
+                "TALKS":  {
+                    icon: 'comment',
+                    color: 'pink-4'
+                },
+                "GROUP": {
+                    icon: 'coffee',
+                    color: 'orange-1'
+                },
+                "MEETINGS": {
+                    icon: 'chair',
+                    color: 'blue-0'
+                },
+                // Business-health - could use capsules
+                "EDUCATIONAL": {
+                    icon: 'chalkboard-teacher',
+                    color: 'blue-4'
+                },
+                "ACCOOM": {
+                    icon: 'bed',
+                    color: 'orange-3'
+                },
+                'PERSONAL': {
+                    icon: 'address-book',
+                    color: 'pink-3'
+                },
+                "DEMO": {
+                    icon: 'broadcast-tower',
+                    color: 'pink-2'
+                },
+                // Workshops - 'pen-square'
+                "FAIRS-FESTIVALS": {
+                    icon: 'music',
+                    color: 'blue-3'
+                },
+                "SELF DEV": {
+                    icon: 'people-carry',
+                    color: 'green-2'
+                }
+            };
+
 
             var getCategories = (features) => {
                 var categories = new Map();
@@ -64,7 +160,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 }).setView(options['startCentre'], options['startZoom'])
                 .addLayer(L.tileLayer(options['layerUrl']));
             
-            var features = app.features;
+            var features = app.listings;
 
             var categoriesFeatures = getCategories(features.toJSON());
             var categories = Array.from(categoriesFeatures.keys());
@@ -84,9 +180,19 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     // drawOnSetTime: false,
                     pointToLayer: function(data, latlng) {
                         var cat1 = data.properties.data.categories[0];
-                        var color = _colors[categories.indexOf(cat1)]
-            
-                        return L.circleMarker(latlng, {"radius":5, "color":color}).bindPopup(function(l) {
+                        
+                        var icon = categoryIcons[cat1] || {icon:'leaf', color:'green-0'};
+
+                        var options = {
+                            icon: icon.icon,
+                            iconShape: 'marker',
+                            borderColor : _colors2[icon.color],
+                            textColor: _colors2[icon.color]
+                        };
+
+                        return L.marker(latlng, {
+                            icon : L.BeautifyIcon.icon(options)
+                        }).bindPopup(function(l) {
                             return "<ul>" +
                             // "<li>Match: " + data.metadata.with[0].match + "</li>"+
                             // "<li>Original: " + data.metadata.spanned + "</li>"+
@@ -133,8 +239,11 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 
                 var p = 0;
                 for(var i = 0 ; i < categories.length; ++i) {
-                    var color = _colors[i];
-                    var n = catDist[categories[i]];
+                    // var color = _colors[i];
+                    var cat = categories[i];
+
+                    var color = _colors2[ (categoryIcons[cat] ? categoryIcons[cat].color: 'green-0') ];
+                    var n = catDist[cat];
                     if(n>0) {
                         p += parseInt((n/markerCount)*100);
                         slices.push(color + " 0 " + p + "%");
@@ -151,12 +260,11 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({
                 iconCreateFunction : iconCreateFunction,
-                maxClusterRadius : 60,
+                maxClusterRadius : 80,
                 helpingCircles : true,
                 elementsPlacementStrategy : 'default',
                 spiderLegPolylineOptions : {weight: 0},
-                spiderfyDistanceMultiplier: 1.5,
-                animate : true
+                spiderfyDistanceMultiplier: 1.5
             });
 
 

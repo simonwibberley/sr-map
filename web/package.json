@@ -2,8 +2,10 @@
   "name": "sr-map",
   "version": "1.0.0",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.8.2",
     "backbone": "^1.4.0",
     "backbone.localstorage": "^2.0.2",
+    "beautifymarker": "^1.0.7",
     "color-scheme": "^1.0.1",
     "express": "^4.16.4",
     "jquery": "^3.4.0",
