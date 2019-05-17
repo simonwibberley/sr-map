@@ -194,12 +194,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                             icon : L.BeautifyIcon.icon(options)
                         }).bindPopup(function(l) {
                             return "<ul>" +
-                            // "<li>Match: " + data.metadata.with[0].match + "</li>"+
-                            // "<li>Original: " + data.metadata.spanned + "</li>"+
-                            "<li>Lat: " + latlng.lat + "</li>"+
-                            "<li>Lng: " + latlng.lng+ "</li>"+
-                            // "<li>Date: " + data.metadata.date + "</li>"+
-                            // "<li>Trial: " + data.metadata.trialId + "</li>"+
+                            "<li>Info: " + data.properties.data['info'] || data.properties.data['subject'] + "</li>"+
                             "</ul>";
                         });
                     }
@@ -263,8 +258,15 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 maxClusterRadius : 80,
                 helpingCircles : true,
                 elementsPlacementStrategy : 'default',
-                spiderLegPolylineOptions : {weight: 0},
-                spiderfyDistanceMultiplier: 1.5
+                spiderLegPolylineOptions : {weight: 1},
+                spiderfyDistanceMultiplier: 1.1,
+                zoomToBoundsOnClick : false,
+                spiderfyOnMaxZoom : false
+            });
+
+            mcgLayerSupportGroup.on('clusterclick', function(e){
+                var cluster = e.layer;
+                cluster.spiderfy();
             });
 
 
