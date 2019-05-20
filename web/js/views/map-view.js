@@ -160,15 +160,19 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 }).setView(options['startCentre'], options['startZoom'])
                 .addLayer(L.tileLayer(options['layerUrl']));
             
-            var features = app.listings;
+            var features = app.listings.toJSON();
 
-            var categoriesFeatures = getCategories(features.toJSON());
+            var categoriesFeatures = getCategories(features);
             var categories = Array.from(categoriesFeatures.keys());
             categories.sort();
             console.log(categories);
-            
+
+
+
+
+
             var makeTimeline = (features) => {
-                var timeline = L.timeline(features.toJSON(), {
+                var timeline = L.timeline(features, {
                     // start :start.toDate().getTime(),
                     // end: end.toDate().getTime(),
                     getInterval: (feature) => {
@@ -190,8 +194,16 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                             textColor: _colors2[icon.color]
                         };
 
+                        var tags =  data.properties.data.categories;
+                        if( data.properties.data.concerns_race) {
+                            tags = tags.concat(["RACE"]);
+                        }
+                        if( data.properties.data.concerns_sexuality) {
+                            tags = tags.concat(["SEXUALITY"]);
+                        }
                         return L.marker(latlng, {
-                            icon : L.BeautifyIcon.icon(options)
+                            icon : L.BeautifyIcon.icon(options),
+                            tags : tags
                         }).bindPopup(function(l) {
                             return "<ul>" +
                             "<li>Info: " + data.properties.data['info'] || data.properties.data['subject'] + "</li>"+
@@ -253,7 +265,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 });
             }
 
-            var mcgLayerSupportGroup = L.markerClusterGroup.layerSupport({
+            var clusterLayer = L.markerClusterGroup.layerSupport({
                 iconCreateFunction : iconCreateFunction,
                 maxClusterRadius : 50,
                 helpingCircles : true,
@@ -264,38 +276,63 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 spiderfyOnMaxZoom : false
             });
 
-            mcgLayerSupportGroup.on('clusterclick', function(e){
+            clusterLayer.on('clusterclick', function(e){
                 var cluster = e.layer;
                 cluster.spiderfy();
             });
 
+            // var control = L.control.layers(null, null);
+                    
+            var timeline = makeTimeline(features);
+            timelineControl.addTimelines(timeline);
+            timeline.addTo(clusterLayer);
+            clusterLayer.checkIn(timeline);
 
-            var control = L.control.layers(null, null);
+            // var timelines = {};
+            // for(var i = 0; i < categories.length; ++i) {
+            //     var category = categories[i];
+            //     var categoryFeatures = new app.Features(categoriesFeatures.get(category));
+            //     if(categoryFeatures.length > 0) {
 
-
-            var timelines = {};
-            for(var i = 0; i < categories.length; ++i) {
-                var category = categories[i];
-                var categoryFeatures = new app.Features(categoriesFeatures.get(category));
-                if(categoryFeatures.length > 0) {
-
-                    var timeline = makeTimeline(categoryFeatures);
-                    timelines[category] = timeline;
-                    timelineControl.addTimelines(timeline);
+            //         var timeline = makeTimeline(categoryFeatures.toJSON());
+            //         timelines[category] = timeline;
+            //         timelineControl.addTimelines(timeline);
     
-                    timeline.addTo(map);
-                    var subGroup = L.featureGroup.subGroup(mcgLayerSupportGroup);
-                    timeline.addTo(subGroup);
-                    mcgLayerSupportGroup.checkIn(subGroup);
-                    control.addOverlay(subGroup, category);
-                    subGroup.addTo(map);
+            //         timeline.addTo(map);
+            //         var subGroup = L.featureGroup.subGroup(clusterLayer);
+            //         timeline.addTo(subGroup);
+            //         clusterLayer.checkIn(subGroup);
+            //         subGroup.addTo(map);
+            //     }
+            // }
 
-                }
+            var categoryFilter = L.control.tagFilterButton({
+                data: categories,
+                filterOnEveryClick: true,
+            //   icon: '<i class="fa fa-suitcase"></i>',
+                clearText: 'clear'
+            }).addTo(map);
 
-            }
+            categoryFilter.enableMCG(clusterLayer);
 
-            mcgLayerSupportGroup.addTo(map);
-            control.addTo(map);
+            var raceSexualityFilter = L.control.tagFilterButton({
+                data: ["RACE", "SEXUALITY"],
+                filterOnEveryClick: true,
+            //   icon: '<i class="fa fa-suitcase"></i>',
+                clearText: 'clear'
+            }).addTo(map);
+
+            raceSexualityFilter.enableMCG(clusterLayer);
+
+            timeline.on("change", function() {
+                raceSexualityFilter.resetCaches(true);
+                categoryFilter.resetCaches(true);
+            });
+
+            clusterLayer.addTo(map);
+
+            L.DomUtil.toFront(categoryFilter._container);
+            // control.addTo(map);
         }
         
     });

@@ -210,7 +210,7 @@ def process_listings_csv(file_path) :
 
 def load_categories() :
     global listing_categories
-    with open("../listings.categories2.json") as fp:
+    with open("../listings.categories.json") as fp:
         listing_categories = json.load(fp)
 
 if __name__ == "__main__" :

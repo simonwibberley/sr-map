@@ -68,3 +68,27 @@
 .green-2 { color: #8ED907 }
 .green-3 { color: #ABD65D }
 .green-4 { color: rgb(78, 112, 15) }
+
+
+.leaflet-bar .tag-filter-tags-container ul {
+    max-height: initial;
+    border: 0;
+    width : 200px;
+}
+
+.leaflet-bar .tag-filter-tags-container ul.header {
+    height: auto;
+
+}
+
+.leaflet-bar .tag-filter-tags-container ul li a {
+    padding : 0 0 0 5px;
+    width : auto;
+    height : auto;
+    line-height : normal;
+}
+
+.leaflet-bar .tag-filter-tags-container .checkbox {
+    font-size: inherit;
+}
+
