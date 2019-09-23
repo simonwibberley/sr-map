@@ -9,8 +9,10 @@ $(function () {
 
     // kick things off by creating the `App`
     var map = new app.Map({
-        startCentre : [55, -4.5],
-        startZoom : 6.3,
+        // startCentre : [55, -4.5],
+        startCentre : [53.7, -4.5],
+        // startZoom : 6.3,
+        startZoom : 5,
         start : moment("1971-01-01"),
         end : moment("1971-01-01"),
         layerUrl : "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -26,7 +28,7 @@ $(function () {
     app.letters.fetch();
 
     promise.done( () => {
-        var appView = new app.AppView();
+        // var appView = new app.AppView();
         var mapView = new app.MapView({model:map});
         mapView.render();
     });

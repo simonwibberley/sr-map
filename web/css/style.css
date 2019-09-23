@@ -1,6 +1,13 @@
 #sr-map { 
-    width: 600px;
-    height: 800px; 
+    /* width: 600px; */
+    /* height: 800px;  */
+
+    width: 550px;
+    height: 450px; 
+}
+
+body {
+    margin: 0px;
 }
 
 
