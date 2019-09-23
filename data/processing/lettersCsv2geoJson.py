@@ -167,19 +167,23 @@ def process_listings_csv(file_path) :
                     date = dateparser.parse(match.group(1))
                     start = datetime.date(date.year, date.month, 1)
                     end = datetime.date(date.year, date.month, monthrange(date.year, date.month)[1])
-                    # listing = row[h['Listing']].strip()
-                    # try :
-                    #     categories = listing_categories[listing]
-                    # except KeyError:
-                    #     # print("%s not found" % listing)
-                    #     categories = ["X"]
+                    subject = row[h['subject']]
+                    try :
+                        categories = listing_categories[subject]
+                    except KeyError:
+                        print("%s not found" % subject)
+                        categories = ["X"]
 
                     data = {
-                        "concerns_race" : "yes" in row[h['Concerns race?']].lower(),
+                        "info1":"theme",
+                        "info2":"subject",
+                        "race" : "yes" in row[h['Concerns race?']].lower(),
                         "sexuality" : "yes" in row[h['Sexuality assumed or stated']].lower(),
                         "theme" : row[h['theme']],
-                        "subject" : row[h['subject']],
-                        "location" : loc_str
+                        "subject" : subject,
+                        "location" : loc_str,
+                        "categories" : categories,
+                        "type" : "LETTER"
                     }
                     feature = {
                         "type": "Feature",
@@ -202,6 +206,7 @@ def process_listings_csv(file_path) :
             id += 1
         print(no_loc)
         print(id)
+    print(len(features))
     return features
 
 

@@ -49,7 +49,45 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
     app.MapView = Backbone.View.extend({
         el:"#sr-map",
         render: function() {
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+            }
 
+            var iconCreateFunction = (cluster) => {
+                var catDist = {};
+                var markers = cluster.getAllChildMarkers();
+                var markerCount = cluster.getChildCount();
+                var slices = [];
+                for(var i = 0; i < markerCount; ++i) {
+                    var marker = markers[i];
+                    var cat = marker.feature.properties.data.categories[0];
+                    if(cat in catDist) {
+                        catDist[cat]++;
+                    } else {
+                        catDist[cat] = 1;
+                    }
+                }
+                
+                var p = 0;
+                for(var i = 0 ; i < categories.length; ++i) {
+                    // var color = _colors[i];
+                    var cat = categories[i];
+                    var colorName = categoryIcons[cat] ? categoryIcons[cat].color: 'green-0';
+                    var color = _colors2[ colorName ];
+                    var n = catDist[cat];
+                    if(n>0) {
+                        p += parseInt((n/markerCount)*100);
+                        slices.push(color + " 0 " + p + "%");
+                    }
+                }
+                
+                var style = "background: conic-gradient("+slices.join(',')+");"
+                return new L.DivIcon({ 
+                    html: '<div  class="marker-cluster-sr-outer" style="'+style+'"><div class="marker-cluster-sr-inner"><span>' + markerCount + '</span></div></div>', 
+                    className: 'marker-cluster-sr', 
+                    iconSize: new L.Point(20, 20) 
+                });
+            };
 
             var categoryIcons = {
                 'CAMPAIGNS' : {
@@ -66,7 +104,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 }, 
                 'TRAVEL': {
                     icon: 'hiking',
-                    color: 'green-1'
+                    color: 'green-3'
                 },
                 'BOOKS-PUBS': {
                     icon: 'book-open',
@@ -114,24 +152,65 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     icon: 'music',
                     color: 'blue-3'
                 },
-                "SELF DEV": {
+                "SELF-DEV": {
                     icon: 'people-carry',
                     color: 'green-2'
+                },
+                "CENTRES" : {
+                    icon: "building",
+                    color: "blue-2"
+                },
+                "CR" : {
+                    icon: "lightbulb",
+                    color: "orange-2"
+                },
+                "WORKSHOPS" : {
+                    icon: "chalkboard-teacher",
+                    color: "orange-4"
+                },
+                "BODIES" : {
+                    icon: "female",
+                    color: "pink-4"
                 }
+
+
+                
             };
 
+            var mapOptions = {
+                zoomDelta: 0.2,
+                maxZoom : 12,
+                zoomSnap : 0.2,
+                wheelPxPerZoomLevel : 100
+            };
+
+            var markerClusterOptions = {
+                iconCreateFunction : iconCreateFunction,
+                maxClusterRadius : 30,
+                helpingCircles : true,
+                elementsPlacementStrategy : 'default',
+                spiderLegPolylineOptions : {weight: 1},
+                spiderfyDistanceMultiplier: 1.1,
+                zoomToBoundsOnClick : false,
+                spiderfyOnMaxZoom : false,
+                singleMarkerMode : false
+            };
+            
 
             var getCategories = (features) => {
                 var categories = new Map();
                 for(var i = 0; i < features.features.length; ++i) {
                     var feature = features.features[i];
-                    var cat = feature.properties.data.categories[0];
-                    if(categories.has(cat)) {
-                        var feats = categories.get(cat);
-                        feats.push(feature);
-                        categories.set(cat, feats);
-                    } else {
-                        categories.set(cat, [feature]);
+                    var cats = feature.properties.data.categories;
+                    for(var j = 0; j < cats.length; ++j) {
+                        var cat = cats[j];
+                        if(categories.has(cat)) {
+                            var feats = categories.get(cat);
+                            feats.push(feature);
+                            categories.set(cat, feats);
+                        } else {
+                            categories.set(cat, [feature]);
+                        }
                     }
                 }
                 // categories = Array.from(categories);
@@ -152,23 +231,62 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             var end = options['end'];
             var DATE_FORMAT = options['DATE_FORMAT'];
 
-            var map = this.map =  L.map(this.$el.attr('id'), {
-                "zoomDelta": 0.2,
-                "maxZoom" : 10,
-                "zoomSnap" : 0.2,
-                "wheelPxPerZoomLevel" : 100
-                }).setView(options['startCentre'], options['startZoom'])
+            var map = this.map = L.map(this.$el.attr('id'), mapOptions).setView(options['startCentre'], options['startZoom'])
                 .addLayer(L.tileLayer(options['layerUrl']));
             
-            var features = app.listings.toJSON();
+            var listings = app.listings;
+            var letters = app.letters;
 
-            var categoriesFeatures = getCategories(features);
+            var categoriesFeatures = getCategories(listings.toJSON());
             var categories = Array.from(categoriesFeatures.keys());
+            categories = categories.concat(["RACE", "SEXUALITY"])
             categories.sort();
             console.log(categories);
+            
+            listings.add(letters.models);
+
+            var features = listings.toJSON();
+
+            var pointToLayer = function(entry, latlng) {
+                var data = entry.properties.data;
+                var cats = data.categories;
+                var cat1 = cats[0];
+                var type = data['type'];
+                var icon = categoryIcons[cat1] || {icon:'leaf', color:'green-0'};
+
+                var options = {
+                    icon: icon.icon,
+                    iconShape: 'marker',
+                    borderColor : _colors2[icon.color],
+                    textColor: _colors2[icon.color],
+                    // iconSize: L.point(15,15),
+                    // iconAnchor : L.point(7,15),
+                    // innerIconAnchor : L.point(0,3),
+                    // innerIconStyle: "font-size:6px"
+                };
+
+                var tags =  data.categories.concat([data.type]);
+                if( data.race) {
+                    tags = tags.concat(["RACE"]);
+                }
+                if( data.sexuality) {
+                    tags = tags.concat(["SEXUALITY"]);
+                }
 
 
-
+                var date = moment(entry.properties.date).format("MMM, YYYY");
+                return L.marker(latlng, {
+                    icon : L.BeautifyIcon.icon(options),
+                    tags : tags
+                }).bindPopup(function(l) {
+                    return" <div><b><u>" + type + "</u></b> " + date + "</div>"+
+                     
+                    "<div><b>" + data[data['info1']]  + "</b></div>"+
+                    "<div>" + data[data['info2']]  + "</div>" +
+                    "<div><em>" + data['location']  + "</em></div>" +
+                    "<div><em>" + cats.join(",") + "</em></div>" ;
+                });
+            };
 
 
             var makeTimeline = (features) => {
@@ -182,34 +300,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                         };
                     },
                     // drawOnSetTime: false,
-                    pointToLayer: function(data, latlng) {
-                        var cat1 = data.properties.data.categories[0];
-                        
-                        var icon = categoryIcons[cat1] || {icon:'leaf', color:'green-0'};
-
-                        var options = {
-                            icon: icon.icon,
-                            iconShape: 'marker',
-                            borderColor : _colors2[icon.color],
-                            textColor: _colors2[icon.color]
-                        };
-
-                        var tags =  data.properties.data.categories;
-                        if( data.properties.data.concerns_race) {
-                            tags = tags.concat(["RACE"]);
-                        }
-                        if( data.properties.data.concerns_sexuality) {
-                            tags = tags.concat(["SEXUALITY"]);
-                        }
-                        return L.marker(latlng, {
-                            icon : L.BeautifyIcon.icon(options),
-                            tags : tags
-                        }).bindPopup(function(l) {
-                            return "<ul>" +
-                            "<li>Info: " + data.properties.data['info'] || data.properties.data['subject'] + "</li>"+
-                            "</ul>";
-                        });
-                    }
+                    pointToLayer: pointToLayer
                 });
                 return timeline;
             }
@@ -227,84 +318,27 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 }
             });
 
-            timelineControl.addTo(map);
 
-            var iconCreateFunction = (cluster) => {
-                var catDist = {};
-                var markers = cluster.getAllChildMarkers();
-                var markerCount = cluster.getChildCount();
-                var slices = [];
-                for(var i = 0; i < markerCount; ++i) {
-                    var marker = markers[i];
-                    var cat = marker.feature.properties.data.categories[0];
-                    if(cat in catDist) {
-                        catDist[cat]++;
-                    } else {
-                        catDist[cat] = 1;
-                    }
-                }
-                
-                var p = 0;
-                for(var i = 0 ; i < categories.length; ++i) {
-                    // var color = _colors[i];
-                    var cat = categories[i];
+        
 
-                    var color = _colors2[ (categoryIcons[cat] ? categoryIcons[cat].color: 'green-0') ];
-                    var n = catDist[cat];
-                    if(n>0) {
-                        p += parseInt((n/markerCount)*100);
-                        slices.push(color + " 0 " + p + "%");
-                    }
-                }
-                
-                var style = "background: conic-gradient("+slices.join(',')+");"
-                return new L.DivIcon({ 
-                    html: '<div  class="marker-cluster-sr-outer" style="'+style+'"><div class="marker-cluster-sr-inner"><span>' + markerCount + '</span></div></div>', 
-                    className: 'marker-cluster-sr', 
-                    iconSize: new L.Point(50, 50) 
-                });
-            }
-
-            var clusterLayer = L.markerClusterGroup.layerSupport({
-                iconCreateFunction : iconCreateFunction,
-                maxClusterRadius : 50,
-                helpingCircles : true,
-                elementsPlacementStrategy : 'default',
-                spiderLegPolylineOptions : {weight: 1},
-                spiderfyDistanceMultiplier: 1.1,
-                zoomToBoundsOnClick : false,
-                spiderfyOnMaxZoom : false
-            });
+            var clusterLayer = L.markerClusterGroup.layerSupport(markerClusterOptions);
 
             clusterLayer.on('clusterclick', function(e){
                 var cluster = e.layer;
                 cluster.spiderfy();
             });
 
-            // var control = L.control.layers(null, null);
-                    
-            var timeline = makeTimeline(features);
-            timelineControl.addTimelines(timeline);
+            var disableTimeline = getURLParameter("timeline") == "false";
+            var timeline;
+            if(disableTimeline) {
+                timeline = L.geoJson(features, {pointToLayer: pointToLayer});
+            } else {
+                timeline = makeTimeline(features);
+                timelineControl.addTo(map);
+                timelineControl.addTimelines(timeline);        
+            }
             timeline.addTo(clusterLayer);
             clusterLayer.checkIn(timeline);
-
-            // var timelines = {};
-            // for(var i = 0; i < categories.length; ++i) {
-            //     var category = categories[i];
-            //     var categoryFeatures = new app.Features(categoriesFeatures.get(category));
-            //     if(categoryFeatures.length > 0) {
-
-            //         var timeline = makeTimeline(categoryFeatures.toJSON());
-            //         timelines[category] = timeline;
-            //         timelineControl.addTimelines(timeline);
-    
-            //         timeline.addTo(map);
-            //         var subGroup = L.featureGroup.subGroup(clusterLayer);
-            //         timeline.addTo(subGroup);
-            //         clusterLayer.checkIn(subGroup);
-            //         subGroup.addTo(map);
-            //     }
-            // }
 
             var categoryFilter = L.control.tagFilterButton({
                 data: categories,
@@ -315,17 +349,27 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             categoryFilter.enableMCG(clusterLayer);
 
-            var raceSexualityFilter = L.control.tagFilterButton({
-                data: ["RACE", "SEXUALITY"],
+            // var raceSexualityFilter = L.control.tagFilterButton({
+            //     data: ["RACE", "SEXUALITY"],
+            //     filterOnEveryClick: true,
+            // //   icon: '<i class="fa fa-suitcase"></i>',
+            //     clearText: 'clear'
+            // }).addTo(map);
+
+            // raceSexualityFilter.enableMCG(clusterLayer);
+
+            var letterListingFilter = L.control.tagFilterButton({
+                data: ["LETTER", "LISTING"],
                 filterOnEveryClick: true,
             //   icon: '<i class="fa fa-suitcase"></i>',
                 clearText: 'clear'
             }).addTo(map);
 
-            raceSexualityFilter.enableMCG(clusterLayer);
+            letterListingFilter.enableMCG(clusterLayer);
 
             timeline.on("change", function() {
-                raceSexualityFilter.resetCaches(true);
+                letterListingFilter.resetCaches(true);
+                // raceSexualityFilter.resetCaches(true);
                 categoryFilter.resetCaches(true);
             });
 

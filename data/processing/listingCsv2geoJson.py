@@ -87,7 +87,7 @@ def load_gn_places() :
     except:
         pass
 
-    with open("../geo/geonames/GB.txt") as csvfile:
+    with open("../geo/geonames/GB-IE.txt") as csvfile:
         reader = csv.reader(csvfile, dialect=csv.excel_tab)
         for row in reader:
             # print(row)
@@ -97,6 +97,7 @@ def load_gn_places() :
                 lat, lng = row[h['latitude']], row[h['longitude']]
                 name = row[h['name']]
                 feature_code = row[h['feature code']]
+                population = row[h['population']]
                 try :
                     places[name]
                 except KeyError: 
@@ -104,7 +105,8 @@ def load_gn_places() :
                 places[name].append({
                     "lat" : lat,
                     "lng" : lng,
-                    "feature_code" : feature_code
+                    "feature_code" : feature_code,
+                    "population" : population
                     # ,
                     # "meta" : row
                 })
@@ -173,19 +175,22 @@ def process_listings_csv(file_path) :
                         print("%s not found" % listing)
                         categories = ["X"]
 
-                    r1 = random.randint(-10,10) * 0.01
-                    r2 = random.randint(-10,10) * 0.01
+                    #r1 = random.randint(-10,10) * 0.01
+                    #r2 = random.randint(-10,10) * 0.01
                     # print(r1)
 
                     data = {
+                        "info1" : "listing",
+                        "info2" : "info",
                         "listing" : listing,
-                        "concerns_race" : "yes" in row[h['Concerns race?']].lower(),
-                        "concerns_sexuality" : "yes" in row[h['Explicitly and foremost concerns sexuality?']].lower(),
+                        "race" : "yes" in row[h['Concerns race?']].lower(),
+                        "sexuality" : "yes" in row[h['Explicitly and foremost concerns sexuality?']].lower(),
                         "info" : row[h['Additional info']],
                         "type" : row[h['Type']],
                         "cultural_genre" : row[h['Cultural genre']],
                         "location" : loc_str,
-                        "categories" : categories
+                        "categories" : categories,
+                        "type" : "LISTING"
                     }
                     feature = {
                         "type": "Feature",
@@ -198,13 +203,15 @@ def process_listings_csv(file_path) :
                         },
                         "geometry" : {
                             "type" : "Point",
-                            "coordinates" : [float(loc["lng"])+r1, float(loc["lat"])+r2]
+                            #"coordinates" : [float(loc["lng"])+r1, float(loc["lat"])+r2]
+                            "coordinates" : [loc["lng"], loc["lat"]]
                         }
                     }
                     features.append(feature)
-                    #print(feature)
+                    
             
             id += 1
+    print(len(features))
     return features
 
 
