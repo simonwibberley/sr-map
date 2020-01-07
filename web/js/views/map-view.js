@@ -368,7 +368,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 						var searchControl = new L.Control.Search({
 							layer: clusterLayer,
-							//marker: false,
+							marker: false,
 							propertyName: 'data.str_id',
 							filterData: function(text, records) {
 								var jsons = fuse.search(text),
@@ -418,7 +418,9 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 								'properties.data.desc'
 								//'properties.operator'
 							],
-							threshold : 0.2
+							threshold : 0.1,
+							tokenize: true,
+						  matchAllTokens: true
 						});
 
 
