@@ -90,91 +90,74 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             };
 
             var categoryIcons = {
-                'CAMPAIGNS' : {
-                    icon: 'bell',
-                    color: 'pink-1'
+								'Educational' : {
+										icon: 'bell',
+										color: 'pink-1'
+								},
+                "Groups & Meetings": {
+                    icon: 'chair',
+                    color: 'orange-1'
                 },
-                'SERVICES-THERAPY': {
-                    icon: 'bath',
-                    color: 'blue-1'
-                },
-                'ARTS-ENTERTAINMENT': {
+                'Arts-entertainment & Media': {
                     icon: 'guitar',
                     color: 'green-0'
                 },
-                'TRAVEL': {
-                    icon: 'hiking',
-                    color: 'green-3'
+                'Therapy & Self-dev': {
+                    icon: 'people-carry',
+                    color: 'blue-1'
                 },
-                'BOOKS-PUBS': {
-                    icon: 'book-open',
-                    color: 'orange-0'
+                "Health & Bodies" : {
+                    icon: "female",
+                    color: "pink-4"
                 },
-                "BUSINESS": {
-                    icon: 'business-time',
-                    color: 'blue-3'
-                },
-                "CONFERENCES": {
-                    icon: 'compress-arrows-alt',
-                    color: 'green-4'
-                },
-                "TALKS":  {
-                    icon: 'comment',
-                    color: 'pink-4'
-                },
-                "GROUPS": {
-                    icon: 'coffee',
-                    color: 'orange-1'
-                },
-                "MEETINGS": {
-                    icon: 'chair',
-                    color: 'blue-0'
-                },
-                // Business-health - could use capsules
-                "EDUCATIONAL": {
-                    icon: 'chalkboard-teacher',
-                    color: 'blue-4'
-                },
-                "ACCOM": {
+                "Accom": {
                     icon: 'bed',
                     color: 'orange-3'
                 },
-                'PERSONAL': {
+                'Books & pubs': {
+                    icon: 'book-open',
+                    color: 'orange-0'
+                },
+                'WLM & Campaigns' : {
+                    icon: 'bell',
+                    color: 'pink-1'
+                },
+                "Events":  {
+                    icon: 'comment',
+                    color: 'pink-4'
+                },
+                "Relationships":  {
+                    icon: 'comment',
+                    color: 'pink-4'
+                },
+                'Life': {
                     icon: 'address-book',
                     color: 'pink-3'
                 },
-                "DEMO": {
-                    icon: 'broadcast-tower',
-                    color: 'pink-2'
+                'Sex': {
+                    icon: 'address-book',
+                    color: 'pink-3'
                 },
-                // Workshops - 'pen-square'
-                "FAIRS-FESTIVALS": {
-                    icon: 'music',
+                'Sexism': {
+                    icon: 'address-book',
+                    color: 'pink-3'
+                },
+                'SR': {
+                    icon: 'hiking',
+                    color: 'green-3'
+                },
+                "Work": {
+                    icon: 'business-time',
                     color: 'blue-3'
                 },
-                "SELF-DEV": {
+                "International": {
                     icon: 'people-carry',
                     color: 'green-2'
                 },
-                "CENTRES" : {
+                "?" : {
                     icon: "building",
                     color: "blue-2"
-                },
-                "CR" : {
-                    icon: "lightbulb",
-                    color: "orange-2"
-                },
-                "WORKSHOPS" : {
-                    icon: "chalkboard-teacher",
-                    color: "orange-4"
-                },
-                "BODIES" : {
-                    icon: "female",
-                    color: "pink-4"
                 }
-
-
-
             };
 
             var mapOptions = {
@@ -204,6 +187,9 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     var cats = feature.properties.data.categories;
                     for(var j = 0; j < cats.length; ++j) {
                         var cat = cats[j];
+												if(cat == "") {
+													continue;
+												}
                         if(categories.has(cat)) {
                             var feats = categories.get(cat);
                             feats.push(feature);
@@ -239,7 +225,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var categoriesFeatures = getCategories(masterJSON);
             var categories = Array.from(categoriesFeatures.keys());
-            categories = categories.concat(["RACE", "SEXUALITY"])
+            //categories = categories.concat(["RACE", "SEXUALITY"])
             categories.sort();
             console.log(categories);
 
