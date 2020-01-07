@@ -235,14 +235,15 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 .addLayer(L.tileLayer(options['layerUrl']));
 
             var master = app.master;
+						var masterJSON = master.toJSON();
 
-            var categoriesFeatures = getCategories(master.toJSON());
+            var categoriesFeatures = getCategories(masterJSON);
             var categories = Array.from(categoriesFeatures.keys());
             categories = categories.concat(["RACE", "SEXUALITY"])
             categories.sort();
             console.log(categories);
 
-            var features = master.toJSON();
+            var features = masterJSON;
 
             var pointToLayer = function(entry, latlng) {
                 var data = entry.properties.data;
@@ -272,18 +273,22 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 
                 var date = moment(entry.properties.date).format("MMM, YYYY");
-                return L.marker(latlng, {
+								var marker = L.marker(latlng, {
                     icon : L.BeautifyIcon.icon(options),
                     tags : tags,
 										data : data
-                }).bindPopup(function(l) {
-                    return" <div><b><u>" + type + "</u></b> " + date + "</div>"+
+                });
+								marker.bindPopup(function(l) {
+										var data1 = data['title'] || data['theme'];
+										var data2 = data['desc'];
 
-                    "<div><b>" + data[data['info1']]  + "</b></div>"+
-                    "<div>" + data[data['info2']]  + "</div>" +
+										return" <div><b><u>" + type + "</u></b> " + date + "</div>"+
+                    "<div><b>" + data1  + "</b></div>"+
+                    "<div>" + data2  + "</div>" +
                     "<div><em>" + data['location']  + "</em></div>" +
                     "<div><em>" + cats.join(",") + "</em></div>" ;
                 });
+                return marker;
             };
 
 
@@ -361,8 +366,9 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             letterListingFilter.enableMCG(clusterLayer);
 
-						map.addControl( new L.Control.Search({
-							layer: timeline,
+						var searchControl = new L.Control.Search({
+							layer: clusterLayer,
+							//marker: false,
 							propertyName: 'data.str_id',
 							filterData: function(text, records) {
 								var jsons = fuse.search(text),
@@ -370,21 +376,49 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 								for(var i in jsons) {
 									key = jsons[i].properties.data.str_id;
-									ret[ key ]= records[key];
+									if(key in records) {
+										ret[ key ]= records[key];
+									}
 								}
 
-								console.log(jsons,ret);
+								//console.log(jsons,ret);
 								return ret;
 							}
-						}) );
+						});
+
+						searchControl.on('search:locationfound', function(e) {
+
+							//console.log('search:locationfound', );
+
+							//map.removeLayer(this._markerSearch)
+							var marker = e.layer;
+							var cluster = clusterLayer.getVisibleParent(marker);
+							cluster.zoomToBounds({
+								padding: [20, 20]
+							});
+
+
+							setTimeout(function() {
+								clusterLayer.getVisibleParent(marker).spiderfy();
+								marker.openPopup();
+							}, 1000);
+
+							//visibleOne.spiderfy();
+							//
+						});
+
+						map.addControl( searchControl );
 
 						var fuse = new Fuse(features.features, {
 							keys: [
+								'properties.data.title',
 								'properties.data.theme',
 								'properties.data.subject',
-								'properties.data.location'
+								'properties.data.location',
+								'properties.data.desc'
 								//'properties.operator'
-							]
+							],
+							threshold : 0.2
 						});
 
 
