@@ -365,14 +365,20 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             }).addTo(map);
 
             letterListingFilter.enableMCG(clusterLayer);
-
+						var remove = [];
 						var searchControl = new L.Control.Search({
 							layer: clusterLayer,
 							marker: false,
+							autoType: false,
+							position : 'topright',
 							propertyName: 'data.str_id',
 							filterData: function(text, records) {
-								var jsons = fuse.search(text),
-									ret = {}, key;
+								clusterLayer.addLayers(remove);
+								remove = [];
+								var jsons = fuse.search(text);
+								var ret = {};
+
+								var key;
 
 								for(var i in jsons) {
 									key = jsons[i].properties.data.str_id;
@@ -381,10 +387,25 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 									}
 								}
 
+								for(var i in records) {
+										if(!(i in ret) ) {
+											remove.push(records[i].layer);
+										}
+								}
+
+								//clusterLayer.clearLayers();
+								clusterLayer.removeLayers(remove);
+
+								//clusterLayer.rem
 								//console.log(jsons,ret);
 								return ret;
 							}
 						});
+						searchControl.on('search:expanded', function(e) {
+							clusterLayer.addLayers(remove);
+							remove = [];
+						});
+
 
 						searchControl.on('search:locationfound', function(e) {
 
@@ -393,13 +414,19 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 							//map.removeLayer(this._markerSearch)
 							var marker = e.layer;
 							var cluster = clusterLayer.getVisibleParent(marker);
-							cluster.zoomToBounds({
-								padding: [20, 20]
-							});
+							if(cluster.zoomToBounds) {
+								cluster.zoomToBounds({
+									padding: [20, 20]
+								});
+							}
+
 
 
 							setTimeout(function() {
-								clusterLayer.getVisibleParent(marker).spiderfy();
+								var p = clusterLayer.getVisibleParent(marker);
+								if (p.spiderfy) {
+										p.spiderfy();
+								}
 								marker.openPopup();
 							}, 1000);
 
