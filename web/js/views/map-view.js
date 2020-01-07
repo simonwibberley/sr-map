@@ -67,7 +67,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                         catDist[cat] = 1;
                     }
                 }
-                
+
                 var p = 0;
                 for(var i = 0 ; i < categories.length; ++i) {
                     // var color = _colors[i];
@@ -80,12 +80,12 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                         slices.push(color + " 0 " + p + "%");
                     }
                 }
-                
+
                 var style = "background: conic-gradient("+slices.join(',')+");"
-                return new L.DivIcon({ 
-                    html: '<div  class="marker-cluster-sr-outer" style="'+style+'"><div class="marker-cluster-sr-inner"><span>' + markerCount + '</span></div></div>', 
-                    className: 'marker-cluster-sr', 
-                    iconSize: new L.Point(20, 20) 
+                return new L.DivIcon({
+                    html: '<div  class="marker-cluster-sr-outer" style="'+style+'"><div class="marker-cluster-sr-inner"><span>' + markerCount + '</span></div></div>',
+                    className: 'marker-cluster-sr',
+                    iconSize: new L.Point(20, 20)
                 });
             };
 
@@ -101,7 +101,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 'ARTS-ENTERTAINMENT': {
                     icon: 'guitar',
                     color: 'green-0'
-                }, 
+                },
                 'TRAVEL': {
                     icon: 'hiking',
                     color: 'green-3'
@@ -174,7 +174,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 }
 
 
-                
+
             };
 
             var mapOptions = {
@@ -195,7 +195,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 spiderfyOnMaxZoom : false,
                 singleMarkerMode : false
             };
-            
+
 
             var getCategories = (features) => {
                 var categories = new Map();
@@ -219,10 +219,10 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             }
 
             // var scheme = new ColorScheme;
-            // scheme.from_hue(21)          
+            // scheme.from_hue(21)
             //     .scheme('tetrade')
-            //     .distance(1);   
-            
+            //     .distance(1);
+
             // var colors = scheme.colors()
 
             var options = this.model.toJSON();
@@ -233,19 +233,16 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var map = this.map = L.map(this.$el.attr('id'), mapOptions).setView(options['startCentre'], options['startZoom'])
                 .addLayer(L.tileLayer(options['layerUrl']));
-            
-            var listings = app.listings;
-            var letters = app.letters;
 
-            var categoriesFeatures = getCategories(listings.toJSON());
+            var master = app.master;
+
+            var categoriesFeatures = getCategories(master.toJSON());
             var categories = Array.from(categoriesFeatures.keys());
             categories = categories.concat(["RACE", "SEXUALITY"])
             categories.sort();
             console.log(categories);
-            
-            listings.add(letters.models);
 
-            var features = listings.toJSON();
+            var features = master.toJSON();
 
             var pointToLayer = function(entry, latlng) {
                 var data = entry.properties.data;
@@ -277,10 +274,11 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 var date = moment(entry.properties.date).format("MMM, YYYY");
                 return L.marker(latlng, {
                     icon : L.BeautifyIcon.icon(options),
-                    tags : tags
+                    tags : tags,
+										data : data
                 }).bindPopup(function(l) {
                     return" <div><b><u>" + type + "</u></b> " + date + "</div>"+
-                     
+
                     "<div><b>" + data[data['info1']]  + "</b></div>"+
                     "<div>" + data[data['info2']]  + "</div>" +
                     "<div><em>" + data['location']  + "</em></div>" +
@@ -304,22 +302,18 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 });
                 return timeline;
             }
-                
-
 
             var timelineControl = this.timelineControl = L.timelineSliderControl({
                 // start : start.toDate().getTime(),
                 // end : end.toDate().getTime(),
                 // duration : daysCovered * $ctrl.timelineDuration,
         //                enableKeyboardControls: true,
-                
+
                 formatOutput: function(date){
                     return moment(date).format(DATE_FORMAT);
                 }
             });
 
-
-        
 
             var clusterLayer = L.markerClusterGroup.layerSupport(markerClusterOptions);
 
@@ -335,7 +329,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             } else {
                 timeline = makeTimeline(features);
                 timelineControl.addTo(map);
-                timelineControl.addTimelines(timeline);        
+                timelineControl.addTimelines(timeline);
             }
             timeline.addTo(clusterLayer);
             clusterLayer.checkIn(timeline);
@@ -367,6 +361,33 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             letterListingFilter.enableMCG(clusterLayer);
 
+						map.addControl( new L.Control.Search({
+							layer: timeline,
+							propertyName: 'data.str_id',
+							filterData: function(text, records) {
+								var jsons = fuse.search(text),
+									ret = {}, key;
+
+								for(var i in jsons) {
+									key = jsons[i].properties.data.str_id;
+									ret[ key ]= records[key];
+								}
+
+								console.log(jsons,ret);
+								return ret;
+							}
+						}) );
+
+						var fuse = new Fuse(features.features, {
+							keys: [
+								'properties.data.theme',
+								'properties.data.subject',
+								'properties.data.location'
+								//'properties.operator'
+							]
+						});
+
+
             timeline.on("change", function() {
                 letterListingFilter.resetCaches(true);
                 // raceSexualityFilter.resetCaches(true);
@@ -378,6 +399,6 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             L.DomUtil.toFront(categoryFilter._container);
             // control.addTo(map);
         }
-        
+
     });
 })(jQuery);

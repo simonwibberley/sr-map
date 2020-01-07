@@ -1,7 +1,70 @@
-<html>
+<!doctype html>
+<html lang="en" data-framework="backbonejs">
+    <head>
+        <meta charset="utf-8">
+        <title>Spare Rib Map</title>
+        <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
+        <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css">
+        <link rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="node_modules/beautifymarker/leaflet-beautify-marker-icon.css">
+        <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.css">
+        <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css">
+        <link rel="stylesheet" href="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.css">
+        <link rel="stylesheet" href="node_modules/css-ripple-effect/dist/ripple.min.css">
+
+
+        <link rel="stylesheet" href="css/style.css">
+        <style>
+        #sr-map { 
+            /* width: 600px; */
+            /* height: 800px;  */
+
+            width: 550px;
+            height: 450px; 
+        }
+        body {
+            margin: 0px;
+        }
+        </style>
+        <script>
+        var _iframe = true;
+        </script>
+    </head>
     <body>
-        <iframe src="http://localhost:3000/" height="450" width="550" boarder="0"></iframe>
+        <section class="sr-map-app">
+            <!-- <header class="header">
+                <h1>Spare Rib Map</h1>
+            </header> -->
+            <section class="main">
+                <!-- <div id="sr-map-app"></div> -->
+                <div id="sr-map"></div>
+            </section>
+            <footer class="footer"></footer>
+        </section>
 
+        <script src="node_modules/color-scheme/lib/color-scheme.min.js" charset="utf-8"></script>
+        <script src="node_modules/moment/moment.js" charset="utf-8"></script>
+        <script src="node_modules/jquery/dist/jquery.js" charset="utf-8"></script>
+        <script src="node_modules/underscore/underscore.js" charset="utf-8"></script>
+        <script src="node_modules/backbone/backbone.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet/dist/leaflet.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+        <script src="node_modules/leaflet.markercluster.layersupport/dist/leaflet.markercluster.layersupport.js"></script>
+        <script src="node_modules/leaflet.markercluster.placementstrategies/dist/leaflet-markercluster.placementstrategies.js"></script>
+        <script src="node_modules/leaflet.featuregroup.subgroup/dist/leaflet.featuregroup.subgroup.js"></script>
+        <script src="node_modules/beautifymarker/leaflet-beautify-marker-icon.js"></script>
+        <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
+        <script src="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.js"></script>
+
+        <script src="js/tag-filter-button-mp.js" charset="utf-8"></script>
+        
+
+        <script src="js/models/map.js" charset="utf-8"></script>
+        <script src="js/models/feature.js" charset="utf-8"></script>
+        <script src="js/collections/features.js" charset="utf-8"></script>
+        <script src="js/views/app-view.js" charset="utf-8"></script>
+        <script src="js/views/map-view.js" charset="utf-8"></script>
+        <script src="js/app.js" charset="utf-8"></script>
     </body>
-
 </html>

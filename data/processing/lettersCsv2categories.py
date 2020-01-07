@@ -11,13 +11,13 @@ def produce_categories_csv():
         listings = set()
         for row in reader:
             sr = row[h['Emotional valence/tone --> SR']].strip()
-            if sr.strip(): 
+            if sr.strip():
                 listings.add(sr)
             wlm = row[h['emotional valence/tone --> WLM ']].strip()
-            if wlm.strip(): 
+            if wlm.strip():
                 listings.add(wlm)
-                    
-        
+
+
         listings = list(listings)
         listings.sort()
 

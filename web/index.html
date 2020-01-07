@@ -11,10 +11,19 @@
         <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css">
         <link rel="stylesheet" href="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.css">
         <link rel="stylesheet" href="node_modules/css-ripple-effect/dist/ripple.min.css">
+        <link rel="stylesheet" href="node_modules/leaflet-search/dist/leaflet-search.src.css">
 
 
         <link rel="stylesheet" href="css/style.css">
-        
+        <style>
+        #sr-map {
+            width: 600px;
+            height: 800px;
+        }
+        </style>
+        <script>
+        var _iframe = false;
+        </script>
     </head>
     <body>
         <section class="sr-map-app">
@@ -28,6 +37,7 @@
             <footer class="footer"></footer>
         </section>
 
+        <script src="node_modules/fuse.js/dist/fuse.js" charset="utf-8"></script>
         <script src="node_modules/color-scheme/lib/color-scheme.min.js" charset="utf-8"></script>
         <script src="node_modules/moment/moment.js" charset="utf-8"></script>
         <script src="node_modules/jquery/dist/jquery.js" charset="utf-8"></script>
@@ -42,9 +52,10 @@
         <script src="node_modules/beautifymarker/leaflet-beautify-marker-icon.js"></script>
         <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.js"></script>
+        <script src="node_modules/leaflet-search/dist/leaflet-search.src.js"></script>
 
         <script src="js/tag-filter-button-mp.js" charset="utf-8"></script>
-        
+
 
         <script src="js/models/map.js" charset="utf-8"></script>
         <script src="js/models/feature.js" charset="utf-8"></script>
