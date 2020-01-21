@@ -91,11 +91,11 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var categoryIcons = {
 								'Educational' : {
-										icon: 'bell',
+										icon: 'feather-alt',
 										color: 'pink-1'
 								},
                 "Groups & Meetings": {
-                    icon: 'chair',
+                    icon: 'mug-hot',
                     color: 'orange-1'
                 },
                 'Arts-entertainment & Media': {
@@ -103,7 +103,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     color: 'green-0'
                 },
                 'Therapy & Self-dev': {
-                    icon: 'people-carry',
+                    icon: 'bath',
                     color: 'blue-1'
                 },
                 "Health & Bodies" : {
@@ -111,7 +111,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     color: "pink-4"
                 },
                 "Accom": {
-                    icon: 'bed',
+                    icon: 'home',
                     color: 'orange-3'
                 },
                 'Books & pubs': {
@@ -119,43 +119,43 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     color: 'orange-0'
                 },
                 'WLM & Campaigns' : {
-                    icon: 'bell',
+                    icon: 'bullhorn',
                     color: 'pink-1'
                 },
                 "Events":  {
-                    icon: 'comment',
+                    icon: 'concierge-bell',
                     color: 'pink-4'
                 },
                 "Relationships":  {
-                    icon: 'comment',
+                    icon: 'hand-holding-heart',
                     color: 'pink-4'
                 },
                 'Life': {
-                    icon: 'address-book',
+                    icon: 'balance-scale-left',
                     color: 'pink-3'
                 },
                 'Sex': {
-                    icon: 'address-book',
+                    icon: 'burn',
                     color: 'pink-3'
                 },
                 'Sexism': {
-                    icon: 'address-book',
+                    icon: 'broom',
                     color: 'pink-3'
                 },
                 'SR': {
-                    icon: 'hiking',
+                    icon: 'pen',
                     color: 'green-3'
                 },
                 "Work": {
-                    icon: 'business-time',
+                    icon: 'cog',
                     color: 'blue-3'
                 },
                 "International": {
-                    icon: 'people-carry',
+                    icon: 'fist-raised',
                     color: 'green-2'
                 },
                 "?" : {
-                    icon: "building",
+                    icon: "question",
                     color: "blue-2"
                 }
             };
@@ -234,6 +234,9 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             var pointToLayer = function(entry, latlng) {
                 var data = entry.properties.data;
                 var cats = data.categories;
+								cats = cats.filter( (cat) => {
+									return cat && cat.length > 0;
+								});
                 var cat1 = cats[0];
                 var type = data['type'];
                 var icon = categoryIcons[cat1] || {icon:'leaf', color:'green-0'};
@@ -250,12 +253,12 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 };
 
                 var tags =  data.categories.concat([data.type]);
-                if( data.race) {
-                    tags = tags.concat(["RACE"]);
-                }
-                if( data.sexuality) {
-                    tags = tags.concat(["SEXUALITY"]);
-                }
+                // if( data.race) {
+                //     tags = tags.concat(["RACE"]);
+                // }
+                // if( data.sexuality) {
+                //     tags = tags.concat(["SEXUALITY"]);
+                // }
 
 
                 var date = moment(entry.properties.date).format("MMM, YYYY");
@@ -268,7 +271,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 										var data1 = data['title'] || data['theme'];
 										var data2 = data['desc'];
 
-										return" <div><b><u>" + type + "</u></b> " + date + "</div>"+
+										return" <div><b><u>" + type + "</u></b> " + date + " p." + data['page'] + "</div>"+
                     "<div><b>" + data1  + "</b></div>"+
                     "<div>" + data2  + "</div>" +
                     "<div><em>" + data['location']  + "</em></div>" +
@@ -344,7 +347,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             // raceSexualityFilter.enableMCG(clusterLayer);
 
             var letterListingFilter = L.control.tagFilterButton({
-                data: ["LETTER", "LISTING"],
+                data: ["letter", "listing"],
                 filterOnEveryClick: true,
             //   icon: '<i class="fa fa-suitcase"></i>',
                 clearText: 'clear'
@@ -447,7 +450,103 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             L.DomUtil.toFront(categoryFilter._container);
             // control.addTo(map);
+
+
+						//
+						//
+						//
+						//
+
+						var legendData = [{
+								'category': 'Educational',
+								'description': 'Covers listings and letters related to the strictly educational, such as courses and workshops, as well as broadly intellectual and research-related listings and letters relating to talks, research projects and conferences.'
+							},{
+								'category': 'Groups & Meetings',
+								'description': 'This category covers consciousness raising (a substantial section in the Classifieds, in which women either sought members for existing groups, sought information on local groups they could join, or sought co-founders for a new group); meetings (these could range from Spare Rib reader meetings to local government and smaller-scale gatherings to discuss a local or ideological issue, or to mobilise); networks (Spare Rib readers and reader-activists worked through, or set up, a wide range of networks designed for collective action or for support, particularly in professional and health-related domains); and centres (Spare Rib was a crucial forum for movement news, including the announcement of new centres, and updates and calls for help and support with existing/flailing ones).'
+							},{
+								'category': 'Arts-entertainment & Media',
+								'description': 'Comprises listings and letters related to theatre, music, visual art and the arts more generally, as well as the media broadly understood. NB: Media often attracted attention for the way it represented women, so there may be some overlap with the section "sexism"'
+							},{
+								'category': 'Therapy & Self-dev',
+								'description': 'Spare Rib saw a growing commercial offering of therapists and therapeutic services advertising in the Classifieds, but also more therapy and mental-health-oriented grassroots support meetings, activity and research. The section also includes self-development - assertiveness training, astrology, and meditation.'
+							},{
+								'category': 'Health & Bodies',
+								'description': 'Indicates listings and letters related to women\'s ill health, physical wellbeing and severer issues of mental health, as well as a wide range of material relating to reproductive health, and physical self-exploration.'
+							},{
+								'category': 'Accom',
+								'description': 'This is largely based on listings from women looking for lodgers or living arrangements and those seeking same.'
+							},{
+								'category': 'Books & pubs',
+								'description': 'A vigorous publishing output – of books, newsletters, pamphlets, conference proceedings, magazines, zines, polemics – was a defining feature of the Women\'s Liberation Movement. So was the flourishing of feminist and feminist-friendly bookshops. This is a wide-ranging section covering all news, services, events and announcements relating to print and to bookshops. It also includes the numerous events generated by Feminist Book Fortnight (1984-1988), a yearly festival celebrating women\'s writing.'
+							},{
+								'category': 'WLM & Campaigns',
+								'description': 'Listings and letters related to the Women\'s Liberation Movement - its development, perceived problems, strengths and suggested areas of improvement – and to campaigns conducted under its aegis, from abortion to health to employment-related.'
+							},{
+								'category': 'Events',
+								'description': 'These cover both political events and recreational: demos and marches, and fairs and festivals.'
+							},{
+								'category': 'Relationships',
+								'description': 'Comprised largely of personal ads in the Listings section (exclusively lesbian), and letters relating to marriage, friendships, and romance.'
+							},{
+								'category': 'Life',
+								'description': 'A large category spanning leisure (hotels, travel, holiday, shopping) and the politics of daily life, including sexism at home, burdens of housework, motherhood, institutional sexism in areas such as benefits, tax and finance more generally. Includes letters and listings relating to domestic violence.'
+							},{
+								'category': 'Sex',
+								'description': 'Letters and listings related to observations, questions about and experiences of sexual experience (separate from contraceptive and reproductive issues which are covered in Health & Bodies).'
+							},{
+								'category': 'Sexism',
+								'description': 'Mostly letters calling out sexism at work, at play in other infrastructures, and in the media.'
+							},{
+								'category': 'SR',
+								'description': '(Spare Rib) Mostly letters relating to Spare Rib, with complaints, suggestions or approval.'
+							},{
+								'category': 'Work',
+								'description': 'Letters and listings related to workplace experience and labour conditions and politics.'
+							},{
+								'category': 'International',
+								'description': 'Letters and listings concerned with developing world struggles, particularly Ireland, Palestine and South Africa.'
+							}
+						];
+
+						var legendElements = [];
+
+						for(var i = 0; i < legendData.length; ++i) {
+								var label = legendData[i].category;
+								var description = legendData[i].description;
+								if(!(label in categoryIcons) ) {
+									console.log(label);
+								}
+								var color = _colors2[categoryIcons[label].color];
+								var icon = categoryIcons[label].icon;
+								legendElements.push({
+										label: label,
+										html: '<span class="fa fa-'+icon+'">',
+										style: {
+												'color': color
+										}
+								});
+								legendElements.push({
+										label: '',
+										html: description
+								});
+						}
+
+						var legend = L.control.htmllegend({
+				        position: 'bottomright',
+				        legends: [{
+				            name: 'Categories',
+				            layer: clusterLayer,
+				            elements: legendElements
+				        }],
+				        collapseSimple: true,
+				        detectStretched: true,
+				        collapsedOnInit: true,
+								disableVisibilityControls: true
+				    })
+				    map.addControl(legend)
+
         }
+
 
     });
 })(jQuery);
