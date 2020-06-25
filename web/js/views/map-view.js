@@ -240,12 +240,20 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 var cat1 = cats[0];
                 var type = data['type'];
                 var icon = categoryIcons[cat1] || {icon:'leaf', color:'green-0'};
+								var textColor, borderColor;
+								textColor = borderColor = cats.length > 1 ? categoryIcons[cats[1]].color : icon.color;
+								if(cats.length > 2 ) {
+									borderColor = categoryIcons[cats[2]].color;
+								}
 
+								// var innerIconStyle = iconStyle;
                 var options = {
                     icon: icon.icon,
                     iconShape: 'marker',
-                    borderColor : _colors2[icon.color],
-                    textColor: _colors2[icon.color],
+                    borderColor : _colors2[borderColor],
+                    textColor: _colors2[textColor],
+										// iconStyle : iconStyle,
+										// innerIconStyle : innerIconStyle,
                     // iconSize: L.point(15,15),
                     // iconAnchor : L.point(7,15),
                     // innerIconAnchor : L.point(0,3),
@@ -357,9 +365,12 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 						var remove = [];
 						var searchControl = new L.Control.Search({
 							layer: clusterLayer,
+							minLength : 999,
+							firstTipSubmit : false,
+							textErr : 'No entries found',
 							marker: false,
 							autoType: false,
-							position : 'topright',
+							position : 'topleft',
 							propertyName: 'data.str_id',
 							filterData: function(text, records) {
 								clusterLayer.addLayers(remove);
@@ -434,7 +445,8 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 								'properties.data.desc'
 								//'properties.operator'
 							],
-							threshold : 0.1,
+							isCaseSensitive : true,
+							threshold : 0.01,
 							tokenize: true,
 						  matchAllTokens: true
 						});

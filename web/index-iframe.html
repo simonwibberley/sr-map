@@ -11,16 +11,18 @@
         <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css">
         <link rel="stylesheet" href="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.css">
         <link rel="stylesheet" href="node_modules/css-ripple-effect/dist/ripple.min.css">
+        <link rel="stylesheet" href="node_modules/leaflet-search/dist/leaflet-search.src.css">
+        <link rel="stylesheet" href="node_modules/leaflet-html-legend/dist/L.Control.HtmlLegend.css" />
 
 
         <link rel="stylesheet" href="css/style.css">
         <style>
-        #sr-map { 
+        #sr-map {
             /* width: 600px; */
             /* height: 800px;  */
 
             width: 550px;
-            height: 450px; 
+            height: 450px;
         }
         body {
             margin: 0px;
@@ -42,12 +44,13 @@
             <footer class="footer"></footer>
         </section>
 
+        <script src="node_modules/fuse.js/dist/fuse.js" charset="utf-8"></script>
         <script src="node_modules/color-scheme/lib/color-scheme.min.js" charset="utf-8"></script>
         <script src="node_modules/moment/moment.js" charset="utf-8"></script>
         <script src="node_modules/jquery/dist/jquery.js" charset="utf-8"></script>
         <script src="node_modules/underscore/underscore.js" charset="utf-8"></script>
         <script src="node_modules/backbone/backbone.js" charset="utf-8"></script>
-        <script src="node_modules/leaflet/dist/leaflet.js" charset="utf-8"></script>
+        <script src="node_modules/leaflet/dist/leaflet-src.js" charset="utf-8"></script>
         <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js" charset="utf-8"></script>
         <script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
         <script src="node_modules/leaflet.markercluster.layersupport/dist/leaflet.markercluster.layersupport.js"></script>
@@ -56,9 +59,12 @@
         <script src="node_modules/beautifymarker/leaflet-beautify-marker-icon.js"></script>
         <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
         <script src="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.js"></script>
+        <script src="node_modules/leaflet-search/dist/leaflet-search.src.js"></script>
+        <script src="node_modules/leaflet-html-legend/dist/L.Control.HtmlLegend.js"></script>
+
 
         <script src="js/tag-filter-button-mp.js" charset="utf-8"></script>
-        
+
 
         <script src="js/models/map.js" charset="utf-8"></script>
         <script src="js/models/feature.js" charset="utf-8"></script>

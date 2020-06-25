@@ -208,6 +208,8 @@ def process_listings_csv(file_path) :
                         }
                     }
                     features.append(feature)
+            else :
+                print(row[h['Town/city/county']])
                     
             
             id += 1
@@ -226,6 +228,6 @@ if __name__ == "__main__" :
     load_gn_places()
     load_categories()
     features = process_listings_csv("../listings.csv")
-    with open("../listings.geo.json", "w") as f:
-        json.dump(features, f, indent=4)
+    #with open("../listings.geo.json", "w") as f:
+    #    json.dump(features, f, indent=4)
     
