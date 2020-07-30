@@ -164,7 +164,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 					// var loc = this._getLocation(this._input.value);
 
 					if(loc===false)
-						this.showAlert();
+						this._fillRecordsCache();
 					else
 					{
 						this.showLocation(loc, this._input.value);
