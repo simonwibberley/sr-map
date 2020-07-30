@@ -11,6 +11,9 @@ $(function () {
     if(_iframe) {
         startCentre = [53.7, -4.5]
         startZoom = 5;
+    } else if(_full) {
+        startCentre = [55, -4.5];
+        startZoom = 6.3;
     } else {
         startCentre = [55, -4.5];
         startZoom = 6.3;

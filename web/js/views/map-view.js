@@ -46,6 +46,178 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 (function ($) {
 	'use strict';
 
+
+	//don't populate input with selected item, and don't clear results
+	var customSearchControl_createTip = function(text, val) {//val is object in recordCache, usually is Latlng
+			var tip;
+
+			if(this.options.buildTip)
+			{
+				tip = this.options.buildTip.call(this, text, val); //custom tip node or html string
+				if(typeof tip === 'string')
+				{
+					var tmpNode = L.DomUtil.create('div');
+					tmpNode.innerHTML = tip;
+					tip = tmpNode.firstChild;
+				}
+			}
+			else
+			{
+				tip = L.DomUtil.create('li', '');
+				tip.innerHTML = text;
+			}
+
+			L.DomUtil.addClass(tip, 'search-tip');
+			tip._text = text; //value replaced in this._input and used by _autoType
+
+			if(this.options.tipAutoSubmit)
+				L.DomEvent
+					.disableClickPropagation(tip)
+					.on(tip, 'click', L.DomEvent.stop, this)
+					.on(tip, 'click', function(e) {
+						// this._input.value = text;
+						this._inputValue = text;
+						this._handleAutoresize();
+						this._input.focus();
+						// this._hideTooltip();
+						this._handleSubmit();
+					}, this);
+
+			return tip;
+		};
+
+		//on case 13 'enter' _fillRecordsCache instead of _handleSubmit
+	var customSearchControl_handleKeypress = function (e) {	//run _input keyup event
+			var self = this;
+
+			switch(e.keyCode)
+			{
+				case 27://Esc
+					this.collapse();
+				break;
+				case 13://Enter
+					// if(this._countertips == 1 || (this.options.firstTipSubmit && this._countertips > 0)) {
+	        //   			if(this._tooltip.currentSelection == -1) {
+					// 		this._handleArrowSelect(1);
+	        //   			}
+					// }
+					// this._handleSubmit();	//do search
+					this.fire("search:cancel");
+	        self._fillRecordsCache();
+				break;
+				case 38://Up
+					this._handleArrowSelect(-1);
+				break;
+				case 40://Down
+					this._handleArrowSelect(1);
+				break;
+				case  8://Backspace
+				case 45://Insert
+				case 46://Delete
+					this._autoTypeTmp = false;//disable temporarily autoType
+				break;
+				case 37://Left
+				case 39://Right
+				case 16://Shift
+				case 17://Ctrl
+				case 35://End
+				case 36://Home
+				break;
+				default://All keys
+					if(this._input.value.length)
+						this._cancel.style.display = 'block';
+					else
+						this._cancel.style.display = 'none';
+
+					if(this._input.value.length >= this.options.minLength)
+					{
+						clearTimeout(this.timerKeypress);	//cancel last search request while type in
+						this.timerKeypress = setTimeout(function() {	//delay before request, for limit jsonp/ajax request
+
+							self._fillRecordsCache();
+
+						}, this.options.delayType);
+					}
+					else
+						this._hideTooltip();
+			}
+
+			this._handleAutoresize();
+		};
+
+		var customSearchControl_handleSubmit =  function() {	//button and tooltip click and enter submit
+
+			// this._hideAutoType();
+
+			this.hideAlert();
+			// this._hideTooltip();
+
+			if(this._input.style.display == 'none')	//on first click show _input only
+				this.expand();
+			else
+			{
+				if(this._input.value === '')	//hide _input only
+					this.collapse();
+				else
+				{
+					var loc = this._getLocation(this._inputValue);
+					// var loc = this._getLocation(this._input.value);
+
+					if(loc===false)
+						this.showAlert();
+					else
+					{
+						this.showLocation(loc, this._input.value);
+						this.fire('search:locationfound', {
+								latlng: loc,
+								text: this._input.value,
+								layer: loc.layer ? loc.layer : null
+							});
+					}
+				}
+			}
+		};
+
+
+		//don't collapse if input present
+		var customSearchControl_collapse = function() {
+			if(this._input.value) {
+				return this;
+			} else {
+				this._hideTooltip();
+				this.cancel();
+				this._alert.style.display = 'none';
+				this._input.blur();
+				if(this.options.collapsed)
+				{
+					this._input.style.display = 'none';
+					this._cancel.style.display = 'none';
+					L.DomUtil.removeClass(this._container, 'search-exp');
+					if (this.options.hideMarkerOnCollapse) {
+						this._map.removeLayer(this._markerSearch);
+					}
+					this._map.off('dragstart click', this.collapse, this);
+				}
+				this.fire('search:collapsed');
+				return this;
+			}
+
+		}
+
+		// _createButton: function (title, className) {
+		// 	var button = L.DomUtil.create('a', className, this._container);
+		// 	button.href = '#';
+		// 	button.title = title;
+		//
+		// 	L.DomEvent
+		// 		.on(button, 'click', L.DomEvent.stop, this)
+		// 		.on(button, 'click', this._handleSubmit, this)
+		// 		.on(button, 'focus', this.collapseDelayedStop, this)
+		// 		.on(button, 'blur', this.collapseDelayed, this);
+		//
+		// 	return button;
+		// },
+
     app.MapView = Backbone.View.extend({
         el:"#sr-map",
         render: function() {
@@ -89,56 +261,53 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 });
             };
 
+
             var categoryIcons = {
-								'Educational' : {
-										icon: 'feather-alt',
+								'Arts & Culture' : {
+										icon: 'theater-masks',
 										color: 'pink-1'
 								},
-                "Groups & Meetings": {
+                "Books & Publications": {
                     icon: 'mug-hot',
                     color: 'orange-1'
                 },
-                'Arts-entertainment & Media': {
+                'Business & Finance': {
                     icon: 'guitar',
                     color: 'green-0'
                 },
-                'Therapy & Self-dev': {
-                    icon: 'bath',
-                    color: 'blue-1'
-                },
-                "Health & Bodies" : {
+                "Discrimination & Violence" : {
                     icon: "female",
                     color: "pink-4"
                 },
-                "Accom": {
+                "Education, Training & Research": {
                     icon: 'home',
                     color: 'orange-3'
                 },
-                'Books & pubs': {
+                'Events & Meetings': {
                     icon: 'book-open',
                     color: 'orange-0'
                 },
-                'WLM & Campaigns' : {
+                'Groups, Networks & Centres' : {
                     icon: 'bullhorn',
                     color: 'pink-1'
                 },
-                "Events":  {
+                "Health, Sex & Therapy":  {
                     icon: 'concierge-bell',
                     color: 'pink-4'
                 },
-                "Relationships":  {
+                "Housing & Accommodation":  {
                     icon: 'hand-holding-heart',
                     color: 'pink-4'
                 },
-                'Life': {
+                'International': {
                     icon: 'balance-scale-left',
                     color: 'pink-3'
                 },
-                'Sex': {
+                'Lifestyle & Leisure': {
                     icon: 'burn',
                     color: 'pink-3'
                 },
-                'Sexism': {
+                'Relationships & Family': {
                     icon: 'broom',
                     color: 'pink-3'
                 },
@@ -146,15 +315,15 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     icon: 'pen',
                     color: 'green-3'
                 },
-                "Work": {
+                "WLM & Campaigns": {
                     icon: 'cog',
                     color: 'blue-3'
                 },
-                "International": {
+                "Work": {
                     icon: 'fist-raised',
                     color: 'green-2'
                 },
-                "?" : {
+                "" : {
                     icon: "question",
                     color: "blue-2"
                 }
@@ -164,7 +333,8 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 zoomDelta: 0.2,
                 maxZoom : 12,
                 zoomSnap : 0.2,
-                wheelPxPerZoomLevel : 100
+                wheelPxPerZoomLevel : 100,
+								// zoomControl: false
             };
 
             var markerClusterOptions = {
@@ -283,7 +453,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     "<div><b>" + data1  + "</b></div>"+
                     "<div>" + data2  + "</div>" +
                     "<div><em>" + data['location']  + "</em></div>" +
-                    "<div><em>" + cats.join(",") + "</em></div>" ;
+                    "<div><em>" + cats.join(", ") + "</em></div>" ;
                 });
                 return marker;
             };
@@ -367,10 +537,12 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 							layer: clusterLayer,
 							minLength : 999,
 							firstTipSubmit : false,
+							// tipAutoSubmit : false,
+							autoCollapse : false,
 							textErr : 'No entries found',
 							marker: false,
 							autoType: false,
-							position : 'topleft',
+							position : 'topright',
 							propertyName: 'data.str_id',
 							filterData: function(text, records) {
 								clusterLayer.addLayers(remove);
@@ -401,7 +573,23 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 								return ret;
 							}
 						});
-						searchControl.on('search:expanded', function(e) {
+
+						var monkeyPatchSearchControl = function(searchControl) {
+								searchControl._handleKeypress = customSearchControl_handleKeypress;
+								searchControl._handleSubmit = customSearchControl_handleSubmit;
+								searchControl._createTip = customSearchControl_createTip;
+								searchControl.collapse = customSearchControl_collapse;
+
+						};
+
+						monkeyPatchSearchControl(searchControl);
+
+						// searchControl.on('search:expanded', function(e) {
+						// 	clusterLayer.addLayers(remove);
+						// 	remove = [];
+						// });
+
+						searchControl.on('search:cancel', function(e) {
 							clusterLayer.addLayers(remove);
 							remove = [];
 						});
@@ -464,98 +652,101 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
             // control.addTo(map);
 
 
-						//
-						//
-						//
-						//
-
-						var legendData = [{
-								'category': 'Educational',
-								'description': 'Covers listings and letters related to the strictly educational, such as courses and workshops, as well as broadly intellectual and research-related listings and letters relating to talks, research projects and conferences.'
-							},{
-								'category': 'Groups & Meetings',
-								'description': 'This category covers consciousness raising (a substantial section in the Classifieds, in which women either sought members for existing groups, sought information on local groups they could join, or sought co-founders for a new group); meetings (these could range from Spare Rib reader meetings to local government and smaller-scale gatherings to discuss a local or ideological issue, or to mobilise); networks (Spare Rib readers and reader-activists worked through, or set up, a wide range of networks designed for collective action or for support, particularly in professional and health-related domains); and centres (Spare Rib was a crucial forum for movement news, including the announcement of new centres, and updates and calls for help and support with existing/flailing ones).'
-							},{
-								'category': 'Arts-entertainment & Media',
-								'description': 'Comprises listings and letters related to theatre, music, visual art and the arts more generally, as well as the media broadly understood. NB: Media often attracted attention for the way it represented women, so there may be some overlap with the section "sexism"'
-							},{
-								'category': 'Therapy & Self-dev',
-								'description': 'Spare Rib saw a growing commercial offering of therapists and therapeutic services advertising in the Classifieds, but also more therapy and mental-health-oriented grassroots support meetings, activity and research. The section also includes self-development - assertiveness training, astrology, and meditation.'
-							},{
-								'category': 'Health & Bodies',
-								'description': 'Indicates listings and letters related to women\'s ill health, physical wellbeing and severer issues of mental health, as well as a wide range of material relating to reproductive health, and physical self-exploration.'
-							},{
-								'category': 'Accom',
-								'description': 'This is largely based on listings from women looking for lodgers or living arrangements and those seeking same.'
-							},{
-								'category': 'Books & pubs',
-								'description': 'A vigorous publishing output – of books, newsletters, pamphlets, conference proceedings, magazines, zines, polemics – was a defining feature of the Women\'s Liberation Movement. So was the flourishing of feminist and feminist-friendly bookshops. This is a wide-ranging section covering all news, services, events and announcements relating to print and to bookshops. It also includes the numerous events generated by Feminist Book Fortnight (1984-1988), a yearly festival celebrating women\'s writing.'
-							},{
-								'category': 'WLM & Campaigns',
-								'description': 'Listings and letters related to the Women\'s Liberation Movement - its development, perceived problems, strengths and suggested areas of improvement – and to campaigns conducted under its aegis, from abortion to health to employment-related.'
-							},{
-								'category': 'Events',
-								'description': 'These cover both political events and recreational: demos and marches, and fairs and festivals.'
-							},{
-								'category': 'Relationships',
-								'description': 'Comprised largely of personal ads in the Listings section (exclusively lesbian), and letters relating to marriage, friendships, and romance.'
-							},{
-								'category': 'Life',
-								'description': 'A large category spanning leisure (hotels, travel, holiday, shopping) and the politics of daily life, including sexism at home, burdens of housework, motherhood, institutional sexism in areas such as benefits, tax and finance more generally. Includes letters and listings relating to domestic violence.'
-							},{
-								'category': 'Sex',
-								'description': 'Letters and listings related to observations, questions about and experiences of sexual experience (separate from contraceptive and reproductive issues which are covered in Health & Bodies).'
-							},{
-								'category': 'Sexism',
-								'description': 'Mostly letters calling out sexism at work, at play in other infrastructures, and in the media.'
-							},{
-								'category': 'SR',
-								'description': '(Spare Rib) Mostly letters relating to Spare Rib, with complaints, suggestions or approval.'
-							},{
-								'category': 'Work',
-								'description': 'Letters and listings related to workplace experience and labour conditions and politics.'
-							},{
-								'category': 'International',
-								'description': 'Letters and listings concerned with developing world struggles, particularly Ireland, Palestine and South Africa.'
-							}
-						];
-
-						var legendElements = [];
-
-						for(var i = 0; i < legendData.length; ++i) {
-								var label = legendData[i].category;
-								var description = legendData[i].description;
-								if(!(label in categoryIcons) ) {
-									console.log(label);
+						var makeLegend = function( ) {
+							var legendData = [{
+									'category': 'Educational',
+									'description': 'Covers listings and letters related to the strictly educational, such as courses and workshops, as well as broadly intellectual and research-related listings and letters relating to talks, research projects and conferences.'
+								},{
+									'category': 'Groups & Meetings',
+									'description': 'This category covers consciousness raising (a substantial section in the Classifieds, in which women either sought members for existing groups, sought information on local groups they could join, or sought co-founders for a new group); meetings (these could range from Spare Rib reader meetings to local government and smaller-scale gatherings to discuss a local or ideological issue, or to mobilise); networks (Spare Rib readers and reader-activists worked through, or set up, a wide range of networks designed for collective action or for support, particularly in professional and health-related domains); and centres (Spare Rib was a crucial forum for movement news, including the announcement of new centres, and updates and calls for help and support with existing/flailing ones).'
+								},{
+									'category': 'Arts-entertainment & Media',
+									'description': 'Comprises listings and letters related to theatre, music, visual art and the arts more generally, as well as the media broadly understood. NB: Media often attracted attention for the way it represented women, so there may be some overlap with the section "sexism"'
+								},{
+									'category': 'Therapy & Self-dev',
+									'description': 'Spare Rib saw a growing commercial offering of therapists and therapeutic services advertising in the Classifieds, but also more therapy and mental-health-oriented grassroots support meetings, activity and research. The section also includes self-development - assertiveness training, astrology, and meditation.'
+								},{
+									'category': 'Health & Bodies',
+									'description': 'Indicates listings and letters related to women\'s ill health, physical wellbeing and severer issues of mental health, as well as a wide range of material relating to reproductive health, and physical self-exploration.'
+								},{
+									'category': 'Accom',
+									'description': 'This is largely based on listings from women looking for lodgers or living arrangements and those seeking same.'
+								},{
+									'category': 'Books & pubs',
+									'description': 'A vigorous publishing output – of books, newsletters, pamphlets, conference proceedings, magazines, zines, polemics – was a defining feature of the Women\'s Liberation Movement. So was the flourishing of feminist and feminist-friendly bookshops. This is a wide-ranging section covering all news, services, events and announcements relating to print and to bookshops. It also includes the numerous events generated by Feminist Book Fortnight (1984-1988), a yearly festival celebrating women\'s writing.'
+								},{
+									'category': 'WLM & Campaigns',
+									'description': 'Listings and letters related to the Women\'s Liberation Movement - its development, perceived problems, strengths and suggested areas of improvement – and to campaigns conducted under its aegis, from abortion to health to employment-related.'
+								},{
+									'category': 'Events',
+									'description': 'These cover both political events and recreational: demos and marches, and fairs and festivals.'
+								},{
+									'category': 'Relationships',
+									'description': 'Comprised largely of personal ads in the Listings section (exclusively lesbian), and letters relating to marriage, friendships, and romance.'
+								},{
+									'category': 'Life',
+									'description': 'A large category spanning leisure (hotels, travel, holiday, shopping) and the politics of daily life, including sexism at home, burdens of housework, motherhood, institutional sexism in areas such as benefits, tax and finance more generally. Includes letters and listings relating to domestic violence.'
+								},{
+									'category': 'Sex',
+									'description': 'Letters and listings related to observations, questions about and experiences of sexual experience (separate from contraceptive and reproductive issues which are covered in Health & Bodies).'
+								},{
+									'category': 'Sexism',
+									'description': 'Mostly letters calling out sexism at work, at play in other infrastructures, and in the media.'
+								},{
+									'category': 'SR',
+									'description': '(Spare Rib) Mostly letters relating to Spare Rib, with complaints, suggestions or approval.'
+								},{
+									'category': 'Work',
+									'description': 'Letters and listings related to workplace experience and labour conditions and politics.'
+								},{
+									'category': 'International',
+									'description': 'Letters and listings concerned with developing world struggles, particularly Ireland, Palestine and South Africa.'
 								}
-								var color = _colors2[categoryIcons[label].color];
-								var icon = categoryIcons[label].icon;
-								legendElements.push({
-										label: label,
-										html: '<span class="fa fa-'+icon+'">',
-										style: {
-												'color': color
-										}
-								});
-								legendElements.push({
-										label: '',
-										html: description
-								});
-						}
+							];
 
-						var legend = L.control.htmllegend({
-				        position: 'bottomright',
-				        legends: [{
-				            name: 'Categories',
-				            layer: clusterLayer,
-				            elements: legendElements
-				        }],
-				        collapseSimple: true,
-				        detectStretched: true,
-				        collapsedOnInit: true,
-								disableVisibilityControls: true
-				    })
-				    map.addControl(legend)
+							var legendElements = [];
+
+							for(var i = 0; i < legendData.length; ++i) {
+									var label = legendData[i].category;
+									var description = legendData[i].description;
+									if(!(label in categoryIcons) ) {
+										console.log(label);
+									}
+									if(!(label in categoryIcons) ) {
+										console.log(label)
+
+									}
+									var color = _colors2[categoryIcons[label].color];
+									var icon = categoryIcons[label].icon;
+									legendElements.push({
+											label: label,
+											html: '<span class="fa fa-'+icon+'">',
+											style: {
+													'color': color
+											}
+									});
+									legendElements.push({
+											label: '',
+											html: description
+									});
+							}
+
+							var legend = L.control.htmllegend({
+					        position: 'bottomright',
+					        legends: [{
+					            name: 'Categories',
+					            layer: clusterLayer,
+					            elements: legendElements
+					        }],
+					        collapseSimple: true,
+					        detectStretched: true,
+					        collapsedOnInit: true,
+									disableVisibilityControls: true
+					    })
+					    map.addControl(legend)
+						};
+
+
 
         }
 

@@ -1,9 +1,9 @@
-#sr-map { 
+#sr-map {
     /* width: 600px; */
     /* height: 800px;  */
 
     width: 550px;
-    height: 450px; 
+    height: 450px;
 }
 
 body {
@@ -102,4 +102,14 @@ body {
 
 .leaflet-control {
     z-index: auto;
+}
+
+.tag-filter-tags-container {
+  z-index: 1010 !important;
+}
+
+
+.search-tooltip {
+  left : -200px !important;
+  max-width: 365px !important; 
 }
