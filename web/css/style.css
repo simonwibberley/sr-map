@@ -111,5 +111,22 @@ body {
 
 .search-tooltip {
   left : -200px !important;
-  max-width: 365px !important; 
+  max-width: 365px !important;
+}
+
+.cat-list {
+  padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding-left: 24px;
+}
+
+.leaflet-html-legend {
+  margin-bottom: 72px !important;
+  margin-right: 31px !important;
+}
+
+.location {
+  /*float: right;*/
+  margin-left: 10px;
 }

@@ -1,6 +1,29 @@
 /*global Backbone, jQuery, _, ENTER_KEY */
 var app = app || {};
 
+var _colors3 = {
+"dull-green" : "#A8D08D",   /* Main Primary color */
+"pale-green" : "#A8D08D",
+"bright-green" : "#00FA00",
+"dark-green" : "#009051",
+"brown" : "#AB7942",
+"blue" : "#00B0F0",
+"pale-red" : "#FF7E79",
+"birght-orange" : "#FFC000",
+"bright-pink" : "#FF40FF",
+"green" : "#ED7D31", /* Main Secondary color (1) */
+"orange" : "#FFC000",
+"turquoise" : "#00FDFF",
+"pale-blue" : "#76D6FF",
+"pale-orange" : "#F7CAAC",
+"purple" : "#7030A0",
+"pale-purple" : "#D883FF",
+"pale-pink" : "#FF8AD8",   /* Main Secondary color (2) */
+"dark-blue" : "#2F5496",
+"bright-pink" : "#FF40FF"
+};
+
+
 var _colors2 = {"pink-0" : "#8B2E5F",   /* Main Primary color */
 "pink-1" : "#F70082",
 "pink-2" : "#BF0667",
@@ -103,6 +126,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 					// }
 					// this._handleSubmit();	//do search
 					this.fire("search:cancel");
+					this._input.value = this._input.value.trim();
 	        self._fillRecordsCache();
 				break;
 				case 38://Up
@@ -134,6 +158,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 						clearTimeout(this.timerKeypress);	//cancel last search request while type in
 						this.timerKeypress = setTimeout(function() {	//delay before request, for limit jsonp/ajax request
 
+							this._input.value = this._input.value.trim();
 							self._fillRecordsCache();
 
 						}, this.options.delayType);
@@ -163,10 +188,10 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 					var loc = this._getLocation(this._inputValue);
 					// var loc = this._getLocation(this._input.value);
 
-					if(loc===false)
+					if(loc===false) {
+						this._input.value = this._input.value.trim();
 						this._fillRecordsCache();
-					else
-					{
+					} else {
 						this.showLocation(loc, this._input.value);
 						this.fire('search:locationfound', {
 								latlng: loc,
@@ -245,7 +270,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     // var color = _colors[i];
                     var cat = categories[i];
                     var colorName = categoryIcons[cat] ? categoryIcons[cat].color: 'green-0';
-                    var color = _colors2[ colorName ];
+                    var color = _colors3[ colorName ];
                     var n = catDist[cat];
                     if(n>0) {
                         p += parseInt((n/markerCount)*100);
@@ -264,70 +289,66 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var categoryIcons = {
 								'Arts & Culture' : {
-										icon: 'theater-masks',
-										color: 'pink-1'
+										icon: 'theatre-masks',
+										color: 'dull-green'
 								},
-                "Books & Publications": {
-                    icon: 'mug-hot',
-                    color: 'orange-1'
-                },
-                'Business & Finance': {
-                    icon: 'guitar',
-                    color: 'green-0'
-                },
-                "Discrimination & Violence" : {
-                    icon: "female",
-                    color: "pink-4"
-                },
-                "Education, Training & Research": {
-                    icon: 'home',
-                    color: 'orange-3'
-                },
-                'Events & Meetings': {
-                    icon: 'book-open',
-                    color: 'orange-0'
-                },
-                'Groups, Networks & Centres' : {
-                    icon: 'bullhorn',
-                    color: 'pink-1'
-                },
-                "Health, Sex & Therapy":  {
-                    icon: 'concierge-bell',
-                    color: 'pink-4'
-                },
-                "Housing & Accommodation":  {
-                    icon: 'hand-holding-heart',
-                    color: 'pink-4'
-                },
-                'International': {
-                    icon: 'balance-scale-left',
-                    color: 'pink-3'
-                },
-                'Lifestyle & Leisure': {
-                    icon: 'burn',
-                    color: 'pink-3'
-                },
-                'Relationships & Family': {
-                    icon: 'broom',
-                    color: 'pink-3'
-                },
-                'SR': {
-                    icon: 'pen',
-                    color: 'green-3'
-                },
-                "WLM & Campaigns": {
-                    icon: 'cog',
-                    color: 'blue-3'
-                },
-                "Work": {
-                    icon: 'fist-raised',
-                    color: 'green-2'
-                },
-                "" : {
-                    icon: "question",
-                    color: "blue-2"
-                }
-            };
+								"Books & Publications": {
+								    icon: 'book-open',
+								    color: 'brown'
+								},
+								'Business & Finance': {
+								    icon: 'pound-sign',
+								    color: 'dark-blue'
+								},
+								"Discrimination & Violence" : {
+								    icon: "exclamation-triangle",
+								    color: "pale-red"
+								},
+								"Education, Training & Research": {
+								    icon: 'feather-alt',
+								    color: 'bright-pink'
+								},
+								'Events & Meetings': {
+								    icon: 'bullhorn',
+								    color: 'turquoise'
+								},
+								'Groups, Networks & Centres' : {
+								    icon: 'coffee',
+								    color: 'pale-blue'
+								},
+								"Health, Sex & Therapy":  {
+								    icon: 'female',
+								    color: 'dark-green'
+								},
+								"International":  {
+										icon: 'home',
+										color: 'orange'
+								},
+								"Housing & Accommodation":  {
+								    icon: 'home',
+								    color: 'orange'
+								},
+								'Lifestyle & Leisure': {
+								    icon: 'balance-scale-right',
+								    color: 'purple'
+								},
+								'Relationships & Family': {
+								    icon: 'hand-holding-heart',
+								    color: 'pale-pink'
+								},
+								'SR': {
+								    icon: 'pen',
+								    color: 'pale-purple'
+								},
+								"WLM & Campaigns": {
+								    icon: 'fist-raised',
+								    color: 'bright-green'
+								},
+								"Work": {
+								    icon: 'cog',
+								    color: 'blue'
+								}
+};
 
             var mapOptions = {
                 zoomDelta: 0.2,
@@ -401,6 +422,20 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
             var features = masterJSON;
 
+						var makePopupCatList = function(cats) {
+								var list ='<ul class="fa-ul cat-list">';
+								for( var i in cats) {
+										var cat = cats[i].trim();
+										var icon = categoryIcons[cat].icon;
+										var colour =  _colors3[categoryIcons[cat].color];
+										var entry = `<li><i class="fa-li fa fa-${icon}" style="color:${colour};"></i>&nbsp;${cat}</li>`;
+										list += entry;
+								}
+								list += "</ul>";
+
+								return list;
+						};
+
             var pointToLayer = function(entry, latlng) {
                 var data = entry.properties.data;
                 var cats = data.categories;
@@ -420,8 +455,8 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                 var options = {
                     icon: icon.icon,
                     iconShape: 'marker',
-                    borderColor : _colors2[borderColor],
-                    textColor: _colors2[textColor],
+                    borderColor : _colors3[borderColor],
+                    textColor: _colors3[textColor],
 										// iconStyle : iconStyle,
 										// innerIconStyle : innerIconStyle,
                     // iconSize: L.point(15,15),
@@ -445,15 +480,21 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
                     tags : tags,
 										data : data
                 });
+
+
+
 								marker.bindPopup(function(l) {
 										var data1 = data['title'] || data['theme'];
 										var data2 = data['desc'];
 
+										var catList = makePopupCatList(cats);
+
 										return" <div><b><u>" + type + "</u></b> " + date + " p." + data['page'] + "</div>"+
+
                     "<div><b>" + data1  + "</b></div>"+
                     "<div>" + data2  + "</div>" +
-                    "<div><em>" + data['location']  + "</em></div>" +
-                    "<div><em>" + cats.join(", ") + "</em></div>" ;
+										"<div><em>" + data['location']  + "</em></div>" +
+                    "<div>" + catList + "</div>" ;
                 });
                 return marker;
             };
@@ -654,53 +695,47 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 						var makeLegend = function( ) {
 							var legendData = [{
-									'category': 'Educational',
-									'description': 'Covers listings and letters related to the strictly educational, such as courses and workshops, as well as broadly intellectual and research-related listings and letters relating to talks, research projects and conferences.'
+									'category': 'Arts & Culture',
+									'description': 'Comprises listings and letters related to theatre, music, film, visual art and the arts more generally, including art exhibitions. Literature and other writing including poetry is categorized under Books & Publications.'
 								},{
-									'category': 'Groups & Meetings',
-									'description': 'This category covers consciousness raising (a substantial section in the Classifieds, in which women either sought members for existing groups, sought information on local groups they could join, or sought co-founders for a new group); meetings (these could range from Spare Rib reader meetings to local government and smaller-scale gatherings to discuss a local or ideological issue, or to mobilise); networks (Spare Rib readers and reader-activists worked through, or set up, a wide range of networks designed for collective action or for support, particularly in professional and health-related domains); and centres (Spare Rib was a crucial forum for movement news, including the announcement of new centres, and updates and calls for help and support with existing/flailing ones).'
+									'category': 'Books & Publications',
+									'description': "A vigorous publishing output – of books, newsletters, pamphlets, conference proceedings, magazines, zines, polemics – was a defining feature of the Women's Liberation Movement. So was the flourishing of feminist and feminist-friendly bookshops. This is a wide-ranging section covering all letters, news, services, events and announcements relating to print and to bookshops, literature, poetry and creative writing. It also includes the numerous events generated by the Feminist Book Fortnight (1984-1988), a yearly festival celebrating women's writing. References to the media, which tend to refer to instances of sexism or discrimination in the media, can be found under ‘Discrimination & Violence’."
 								},{
-									'category': 'Arts-entertainment & Media',
-									'description': 'Comprises listings and letters related to theatre, music, visual art and the arts more generally, as well as the media broadly understood. NB: Media often attracted attention for the way it represented women, so there may be some overlap with the section "sexism"'
+									'category': 'Business & Finance',
+									'description': 'Covers letters and listings relating to personal finance (including tax affairs, pensions and benefits), activist businesses (including booksellers, therapists, feminist merchandise, collectives and cooperatives) and sources of support for feminist ventures (e.g. SR revenue, sources of funding for women’s centres). Mainly listings advertising small businesses (often through job advertisements, also categorised under ‘Work’), demonstrating the existence and wide geographical distribution of a feminist economic base. '
 								},{
-									'category': 'Therapy & Self-dev',
-									'description': 'Spare Rib saw a growing commercial offering of therapists and therapeutic services advertising in the Classifieds, but also more therapy and mental-health-oriented grassroots support meetings, activity and research. The section also includes self-development - assertiveness training, astrology, and meditation.'
+									'category': 'Discrimination & Violence',
+									'description': 'Mainly letters calling out various forms of discrimination (sexism, racism, classism, ableism) at work, at play within other infrastructures, and in the media; as well as letters and listings relating to domestic violence, racial violence, sexual violence and other forms of abuse. There are many references to discrimination in the media which fall under this category.'
 								},{
-									'category': 'Health & Bodies',
+									'category': 'Education, Training & Research',
 									'description': 'Indicates listings and letters related to women\'s ill health, physical wellbeing and severer issues of mental health, as well as a wide range of material relating to reproductive health, and physical self-exploration.'
 								},{
-									'category': 'Accom',
+									'category': 'Events & Meetings',
 									'description': 'This is largely based on listings from women looking for lodgers or living arrangements and those seeking same.'
 								},{
-									'category': 'Books & pubs',
+									'category': 'Groups, Networks & Centres',
 									'description': 'A vigorous publishing output – of books, newsletters, pamphlets, conference proceedings, magazines, zines, polemics – was a defining feature of the Women\'s Liberation Movement. So was the flourishing of feminist and feminist-friendly bookshops. This is a wide-ranging section covering all news, services, events and announcements relating to print and to bookshops. It also includes the numerous events generated by Feminist Book Fortnight (1984-1988), a yearly festival celebrating women\'s writing.'
 								},{
-									'category': 'WLM & Campaigns',
+									'category': 'Health, Sex & Therapy',
 									'description': 'Listings and letters related to the Women\'s Liberation Movement - its development, perceived problems, strengths and suggested areas of improvement – and to campaigns conducted under its aegis, from abortion to health to employment-related.'
 								},{
-									'category': 'Events',
+									'category': 'Housing & Accommodation',
 									'description': 'These cover both political events and recreational: demos and marches, and fairs and festivals.'
 								},{
-									'category': 'Relationships',
+									'category': 'Lifestyle & Leisure',
 									'description': 'Comprised largely of personal ads in the Listings section (exclusively lesbian), and letters relating to marriage, friendships, and romance.'
 								},{
-									'category': 'Life',
+									'category': 'Relationships & Family',
 									'description': 'A large category spanning leisure (hotels, travel, holiday, shopping) and the politics of daily life, including sexism at home, burdens of housework, motherhood, institutional sexism in areas such as benefits, tax and finance more generally. Includes letters and listings relating to domestic violence.'
 								},{
-									'category': 'Sex',
+									'category': 'SR',
 									'description': 'Letters and listings related to observations, questions about and experiences of sexual experience (separate from contraceptive and reproductive issues which are covered in Health & Bodies).'
 								},{
-									'category': 'Sexism',
+									'category': 'WLM & Campaigns',
 									'description': 'Mostly letters calling out sexism at work, at play in other infrastructures, and in the media.'
 								},{
-									'category': 'SR',
-									'description': '(Spare Rib) Mostly letters relating to Spare Rib, with complaints, suggestions or approval.'
-								},{
 									'category': 'Work',
-									'description': 'Letters and listings related to workplace experience and labour conditions and politics.'
-								},{
-									'category': 'International',
-									'description': 'Letters and listings concerned with developing world struggles, particularly Ireland, Palestine and South Africa.'
+									'description': '(Spare Rib) Mostly letters relating to Spare Rib, with complaints, suggestions or approval.'
 								}
 							];
 
@@ -716,7 +751,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 										console.log(label)
 
 									}
-									var color = _colors2[categoryIcons[label].color];
+									var color = _colors3[categoryIcons[label].color];
 									var icon = categoryIcons[label].icon;
 									legendElements.push({
 											label: label,
@@ -747,6 +782,9 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 						};
 
 
+						if(_full) {
+							makeLegend();
+						}
 
         }
 
