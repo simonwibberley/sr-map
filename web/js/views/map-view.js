@@ -786,15 +786,7 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 
 						var makeTimelineToggle = function() {
 
-							var icon;
-
-							if(disableTimeline) {
-								icon = "fas fa-clock";
-							} else {
-								icon = "far fa-clock";
-							}
-
-							L.easyButton(icon, function(btn, map){
+							var toggleTimeline = function(){
 								var url = location.protocol + "//" + location.host + location.pathname;
 								if(disableTimeline) {
 									 url += "?timeline=true";
@@ -802,7 +794,25 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 									 url += "?timeline=false";
 								}
 								window.location = url;
-							}).addTo( map );
+							};
+
+							var icon;
+							var title;
+
+							if(disableTimeline) {
+								icon = "far fa-clock";
+								title = "Enable Timeline";
+							} else {
+								icon = "fas fa-clock";
+								title = "Disable Timeline";
+							};
+
+							L.easyButton({states: [{
+						    stateName: 'toggle-timeline',
+						    icon: icon,
+						    title: title,
+						    onClick: toggleTimeline
+						  }]}).addTo( map );
 						};
 
 
