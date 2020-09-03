@@ -12,19 +12,22 @@
         <link rel="stylesheet" href="node_modules/leaflet-tag-filter-button/src/leaflet-tag-filter-button.css">
         <link rel="stylesheet" href="node_modules/css-ripple-effect/dist/ripple.min.css">
         <link rel="stylesheet" href="node_modules/leaflet-search/dist/leaflet-search.src.css">
-        <link rel="stylesheet" href="node_modules/leaflet-html-legend/dist/L.Control.HtmlLegend.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-html-legend/dist/L.Control.HtmlLegend.css">
         <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css">
 
         <link rel="stylesheet" href="css/style.css">
         <style>
         #sr-map {
-            width: 600px;
-            height: 800px;
+            width: 100vw;
+            height: 100vh;
+        }
+        body {
+            margin: 0px;
         }
         </style>
         <script>
+        var _full = true;
         var _iframe = false;
-        var _full = false;
         </script>
     </head>
     <body>
@@ -57,6 +60,7 @@
         <script src="node_modules/leaflet-search/dist/leaflet-search.src.js"></script>
         <script src="node_modules/leaflet-html-legend/dist/L.Control.HtmlLegend.js"></script>
         <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
+
 
 
         <script src="js/tag-filter-button-mp.js" charset="utf-8"></script>

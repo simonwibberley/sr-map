@@ -778,12 +778,39 @@ var _colors = [ "#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941"
 									disableVisibilityControls: true
 					    })
 					    map.addControl(legend)
+
+
 						};
 
 
-						if(_full) {
+
+						var makeTimelineToggle = function() {
+
+							var icon;
+
+							if(disableTimeline) {
+								icon = "fas fa-clock";
+							} else {
+								icon = "far fa-clock";
+							}
+
+							L.easyButton(icon, function(btn, map){
+								var url = location.protocol + "//" + location.host + location.pathname;
+								if(disableTimeline) {
+									 url += "?timeline=true";
+								} else {
+									 url += "?timeline=false";
+								}
+								window.location = url;
+							}).addTo( map );
+						};
+
+
 							makeLegend();
-						}
+							makeTimelineToggle();
+						// if(_full) {
+						// 	makeLegend();
+						// }
 
         }
 
