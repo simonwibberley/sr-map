@@ -105,6 +105,7 @@ body {
 }
 
 .tag-filter-tags-container {
+  padding-left: 38px !important;
   z-index: 1010 !important;
 }
 
